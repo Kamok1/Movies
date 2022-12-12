@@ -5,8 +5,8 @@ namespace Abstractions;
 
 public interface IGenreService
 {
-    Task<bool> AddAsync(GenresRequest genre);
-    Task<List<Genre>?> GetAllGenresAsync();
-    Task<Movie?> EditMovieGenres(Movie movie, EditGenre genre);
+    Task AddAsync(GenresRequest genre);
+    Task<List<DtoGenre>> GetGenresDtoAsync();
+    Task EditMovieGenresAsync(Movie movie, EditGenre genre);
 
 }

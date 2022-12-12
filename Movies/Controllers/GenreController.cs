@@ -22,25 +22,24 @@ public class GenreController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetGenres()
+    public async Task<IActionResult> Get()
     {
-        var genres = await _genreService.GetAllGenresAsync();
-        return genres != null ? Ok(genres.Select(genre => new DtoGenre(genre))) : NotFound();
+        return Ok(await _genreService.GetGenresDtoAsync());
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddGenre(GenresRequest genre)
+    public async Task<IActionResult> Add([FromBody] GenresRequest genre)
     {
-        return Ok(await _genreService.AddAsync(genre));
+        await _genreService.AddAsync(genre);
+        return Ok();
     }
 
     [HttpPut]
     [Route("movie")]
-    public async Task<IActionResult> EditMovieGenres(EditGenre editGenre)
+    public async Task<IActionResult> EditMovieGenres([FromBody] EditGenre editGenre)
     {
         var movie = await _movieService.GetMovieAsync(editGenre.MovieId);
-        movie = await _genreService.EditMovieGenres(movie, editGenre);
-
-        return movie != null ? Ok(new DtoMovie(movie)) : BadRequest();
+        await _genreService.EditMovieGenresAsync(movie, editGenre);
+        return Ok();
     }
 }

@@ -2,6 +2,7 @@
 using Data;
 using Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Models.Exceptions;
 using Models.Genre;
 
 namespace Implementations;
@@ -14,36 +15,25 @@ public class GenreService : IGenreService
     {
         _db = db;
     }
-    public async Task<bool> AddAsync(GenresRequest genres)
+    public async Task AddAsync(GenresRequest genres)
     {
         var genresList = genres.GenreNames.Select(genre => new Genre{Name = genre}).ToList();
         await _db.Genre.AddRangeAsync(genresList);
-        return await _db.SaveChangesAsync() != 0;
+        if (await _db.SaveChangesAsync() == 0)
+            throw new AddingException<Genre>();
     }
-    public async Task<List<Genre>?> GetAllGenresAsync()
+    public async Task<List<DtoGenre>> GetGenresDtoAsync()
     {
-        return await _db.Genre.ToListAsync();
+        return await _db.Genre.Select(genre => new DtoGenre(genre)).ToListAsync();
     }
-    public async Task<Movie?> EditMovieGenres(Movie movie,EditGenre genres)
+    public async Task EditMovieGenresAsync(Movie movie,EditGenre genres)
     {
-        var genresNames = genres.GenreIds.Select(id => _db.Genre.Find(id)).Select(genre=> genre?.Name).ToList();
-        var listOfGenres =  await GetListOfGenresAsync(genresNames);
+        var listOfGenres = genres.GenreIds.Select(id => _db.Genre.Find(id)).ToList();
         if (movie.Genres.Equals(listOfGenres))
-            return movie;
+            return;
 
-        movie.Genres = listOfGenres;
-        return await _db.SaveChangesAsync() != 0 ? movie : null;
-    }
-    private async Task<List<Genre>> GetListOfGenresAsync(List<string?> genresNames)
-    {
-        var genres = new List<Genre>();
-        foreach (var name in genresNames)
-        {
-            var genre = await _db.Genre.FirstOrDefaultAsync(e => e.Name == name);
-            if(genre != default)
-                genres.Add(genre);
-        }
-
-        return genres;
+        movie.Genres = listOfGenres!;
+        if (await _db.SaveChangesAsync() == 0)
+            throw new EditingException<Genre>();
     }
 }

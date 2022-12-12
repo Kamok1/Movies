@@ -115,13 +115,13 @@ namespace Implementations
         {
             var query = PrepareQuery(includeReviews, includeActors, includePoster, asNoTracking)!;
 
-            if ((year ?? 0) !<= 0)
+            if ((year ?? 0) > 0)
                 query = query.Where(x => x.ReleaseDate.Year == year);
-            if ((genreId ?? 0) !<= 0)
+            if ((genreId ?? 0) > 0)
                 query = query.Where(x => x.Genres.Any(x => x.Id == genreId));
-            if ((directorId ?? 0) ! <= 0)
+            if ((directorId ?? 0) > 0)
                 query = query.Where(x => x.Director != null && x.Director.Id == directorId);
-            if ((actorId ?? 0) ! <= 0)
+            if ((actorId ?? 0) > 0)
                 query = query.Where(x => x.Actors.Any(d => d.Id == actorId));
             if (title != null)
                 query = query.Where(x => x.Title.Contains(title));

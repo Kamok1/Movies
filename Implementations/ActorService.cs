@@ -60,7 +60,7 @@ namespace Implementations
         public async Task<List<DtoActor>> GetActorsDtoAsync(int? movieId = default)
         {
             IQueryable<Actor> actors = _db.Actor;
-            if ((movieId ?? 0) !<= 0)
+            if ((movieId ?? 0) > 0)
                 actors = _db.Actor.Where(actor => actor.Movies.Any(movie => movie.Id == movieId));
 
             return await actors.Select(actor => new DtoActor(actor)).ToListAsync();

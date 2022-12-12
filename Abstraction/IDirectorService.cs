@@ -1,12 +1,15 @@
-﻿using Data.Models;
+﻿using Data.Migrations;
+using Data.Models;
 using Models.Director;
 
 namespace Abstractions;
 
 public interface IDirectorService
 {
-    Task<Director?> EditAsync(RequestDirector editDirector, int directorId);
-    Task<Movie?> EditMovieDirectorAsync(Movie movie, EditMovieDirector editMovieDirector);
-    Task<Director?> AddAsync(RequestDirector addDirector);
-    IQueryable<Director> GetDirectories(int? id = default);
+    Task EditAsync(RequestDirector editDirector, int directorId);
+    Task EditMovieDirectorAsync(Movie movie, int directorId);
+    Task AddAsync(RequestDirector addDirector);
+    Task DeleteAsync(int id);
+    Task<List<DtoDirector>> GetDirectorsDtoAsync();
+    Task<DtoDirector> GetDirectorDtoAsync(int id);
 }

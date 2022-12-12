@@ -23,45 +23,42 @@ public class DirectorController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    [Route("{directorId}")]
-    public async Task<IActionResult> Get([FromRoute] int directorId)
+    public async Task<IActionResult> Get(int id)
     {
-        var director = await _directorService.GetDirectories(directorId).FirstOrDefaultAsync();
-        return director != default ? Ok(new DtoDirector(director)) : NotFound();
+        if (id > 0)
+            return Ok(await _directorService.GetDirectorDtoAsync(id));
+        return Ok(await _directorService.GetDirectorsDtoAsync());
     }
 
-    [HttpGet]
-    [AllowAnonymous]
-    public async Task<IActionResult> GetAll()
+    [HttpDelete]
+    [Route("{id}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        var directors = await _directorService.GetDirectories().ToListAsync();
-        if (directors.IsNullOrEmpty())
-            return NotFound();
-
-        return Ok(directors.Select(director => new DtoDirector(director)));
+        await _directorService.DeleteAsync(id);
+        return Ok();
     }
 
     [HttpPost]
     public async Task<IActionResult> Add(RequestDirector addDirector)
     {
-        var director = await _directorService.AddAsync(addDirector);
-        return director != default ? Ok(new DtoDirector(director)) : NotFound();
+        await _directorService.AddAsync(addDirector);
+        return Ok();
     }
 
     [HttpPut]
     [Route("{directorId}")]
     public async Task<IActionResult> Edit(RequestDirector editDirector, int directorId)
     {
-        var director = await _directorService.EditAsync(editDirector, directorId);
-        return director != default ? Ok(new DtoDirector(director)) : NotFound();
+        await _directorService.EditAsync(editDirector, directorId);
+        return Ok();
     }
 
     [HttpPut("movie")]
     public async Task<IActionResult> EditMovieDirectors(EditMovieDirector editMovieDirectors)
     {
         var movie = await _movieServices.GetMovieAsync(editMovieDirectors.MovieId);
-        movie = await _directorService.EditMovieDirectorAsync(movie, editMovieDirectors);
-        return movie != default ? Ok(new DtoMovie(movie)) : NotFound();
+        await _directorService.EditMovieDirectorAsync(movie, editMovieDirectors.DirectorId);
+        return Ok();
     }
 }
 

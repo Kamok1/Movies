@@ -1,7 +1,10 @@
 ﻿using Abstractions;
 using Data;
 using Data.Models;
+using Microsoft.EntityFrameworkCore;
 using Models.Director;
+using Models.Exceptions;
+using Models.Movie;
 
 namespace Implementations;
 
@@ -13,45 +16,60 @@ public class DirectorService : IDirectorService
     {
         _db = db;
     }
-    public async Task<Director?> EditAsync(RequestDirector editDirector, int directorId)
+    public async Task EditAsync(RequestDirector editDirector, int directorId)
     {
-        var director = await _db.Director.FindAsync(directorId);
-        if (director == null)
-            return null;
+        var director = await GetDirectorAsync(directorId);
 
         director.Name = editDirector.Name;
         director.Description = editDirector.Description;
         director.DateOfBirth = editDirector.DateOfBirth;
-        return await _db.SaveChangesAsync() != 0 ? director : null;
+        if (await _db.SaveChangesAsync() == 0)
+            throw new EditingException<Director>();
     }
-
-    public async Task<Movie?> EditMovieDirectorAsync(Movie movie, EditMovieDirector editMovieDirector)
+    public async Task EditMovieDirectorAsync(Movie movie, int directorId)
     {
-        var director = await _db.Director.FindAsync(editMovieDirector.DirectorId);
-        if (director == null)
-            return null;
+        var director = await GetDirectorAsync(directorId);
 
         movie.Director = director;
-        return await _db.SaveChangesAsync() != 0 ? movie : null;
+        if (await _db.SaveChangesAsync() == 0)
+            throw new EditingException<Movie>();
     }
 
-    public async Task<Director?> AddAsync(RequestDirector addDirector)
+    public async Task AddAsync(RequestDirector addDirector)
     {
-        var model = new Director()
+        var director = new Director()
         {
             Name = addDirector.Name,
             Description = addDirector.Description,
             DateOfBirth = addDirector.DateOfBirth,
         };
-        await _db.Director.AddAsync(model);
-        return await _db.SaveChangesAsync() != 0 ? model : null;
+        await _db.Director.AddAsync(director);
+        if(await _db.SaveChangesAsync() == 0)
+            throw new AddingException<Director>();
     }
 
-    public IQueryable<Director> GetDirectories(int? id = default)
+    public async Task DeleteAsync(int id)
     {
-        var query = _db.Director.AsQueryable();
-        if ((id ?? 0) != 0)
-            return query.Where(director => director.Id == id);
-        return query;
+        _db.Remove(await GetDirectorAsync(id));
+        if (await _db.SaveChangesAsync() == 0)
+            throw new DeletingException<Director>();
+    }
+
+    public async Task<List<DtoDirector>> GetDirectorsDtoAsync()
+    {
+        return await _db.Director.Select(director => new DtoDirector(director)).ToListAsync();
+    }
+
+    public async Task<DtoDirector> GetDirectorDtoAsync(int id)
+    {
+        return new DtoDirector(await GetDirectorAsync(id));
+    }
+
+    private async Task<Director> GetDirectorAsync(int id)
+    {
+        var director = await _db.Director.FindAsync(id);
+        if (director == default)
+            throw new NotFoundException<Director>();
+        return director;
     }
 }

@@ -18,15 +18,4 @@ public static class MyExtensions
         }
     }
 
-    public static void EnsureThatPathExists(string path)
-    {
-        if (Directory.Exists(path) == false)
-            Directory.CreateDirectory(path);
-    }
-
-    public static async Task SaveFileAsync(IFormFile file, string path)
-    {
-        await using var stream = new FileStream(path, FileMode.Create);
-        await file.CopyToAsync(stream);
-    }
 }

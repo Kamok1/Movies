@@ -15,10 +15,12 @@ public class ImageService : IImageService
 {
     private readonly AppDbContext _db;
     private readonly AppSettings _settings;
-    public ImageService(AppDbContext db, AppSettings settings)
+    private readonly IFileService _fileService;
+    public ImageService(AppDbContext db, AppSettings settings, IFileService fileService)
     {
         _db = db;
         _settings = settings;
+        _fileService = fileService;
     }
 
     public async Task<DtoImage> GetMainPoster(int movieId)
@@ -44,8 +46,7 @@ public class ImageService : IImageService
         var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PostersPath, folderName);
         var fileName = $"{movie.Posters.Count + 1}.jpg";
 
-        EnsureThatPathExists(folderPath);
-        await SaveFileAsync(file, Path.Combine(folderPath, fileName));
+        var saveFileTask = _fileService.SaveFile(file, fileName, Path.Combine(folderPath, fileName));
 
         if (isMain)
             movie.Posters.ForEach(poster => poster.IsMain = false);
@@ -57,6 +58,7 @@ public class ImageService : IImageService
             Path = Path.Combine(_settings.PostersPath, folderName, fileName),
         });
 
+        await saveFileTask;
         return await _db.SaveChangesAsync() != 0;
     }
 
@@ -74,17 +76,17 @@ public class ImageService : IImageService
         var folderName = $"{movie.Title}_{movie.Id}_pictures";
         var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PicturesPath, folderName);
         var fileName = $"{movie.Pictures.Count + 1}.jpg";
-        
-        EnsureThatPathExists(folderPath);
-        await SaveFileAsync(file, Path.Combine(folderPath, fileName));
-        
+
+        var saveFileTask = _fileService.SaveFile(file, fileName, Path.Combine(folderPath, fileName));
+
+
 
         movie.Pictures.Add(new Picture
         {
             Movie = movie,
             Path = Path.Combine(_settings.PicturesPath, folderName, fileName),
         });
-
+        await saveFileTask;
         return await _db.SaveChangesAsync() != 0;
     }
     public async Task<bool> EditMainPoster(Movie movie, string path)

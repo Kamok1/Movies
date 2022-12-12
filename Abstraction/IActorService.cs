@@ -1,16 +1,13 @@
 ﻿using Data.Models;
 using Models.Actor;
 
-namespace Abstractions
+namespace Abstractions;
+public interface IActorService
 {
-    public interface IActorService
-    {
-        Task<Actor> EditAsync(RequestActor reqActor, int actorId);
-        Task<Movie> EditMovieActorsAsync(Movie movie ,EditMovieActors editMovieActor);
-        Task<Actor> AddAsync(RequestActor actor);
-        Task Delete(int id);
-        Task<List<DtoActor>> GetActors(int? movieId);
-        Task<DtoActor> GetActor(int id);
-
-    }
+    Task EditAsync(RequestActor reqActor, int id);
+    Task EditMovieActorsAsync(Movie movie ,EditMovieActors editMovieActor);
+    Task AddAsync(RequestActor actor);
+    Task DeleteAsync(int id);
+    Task<List<DtoActor>> GetActorsDtoAsync(int? movieId);
+    Task<DtoActor> GetActorDtoAsync(int id);
 }

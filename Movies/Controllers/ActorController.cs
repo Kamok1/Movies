@@ -27,29 +27,30 @@ public class ActorController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Get(int actorId, int movieId)
     {
-        if (actorId != 0)
-            return Ok(_actorService.GetActor(actorId));
+        if (actorId > 0)
+            return Ok(await _actorService.GetActorDtoAsync(actorId));
 
-        return Ok(_actorService.GetActors(movieId));
+        return Ok(await _actorService.GetActorsDtoAsync(movieId));
     }
 
     [HttpDelete]
-    public async Task<IActionResult> Delete([FromRoute] int actorId)
+    [Route("{id}")]
+    public async Task<IActionResult> Delete([FromRoute] int id)
     {
-        await _actorService.Delete(actorId);
+        await _actorService.DeleteAsync(id);
         return Ok();
     }
 
     [HttpPut]
-    [Route("{actorId}")]
-    public async Task<IActionResult> Edit(RequestActor editActor, int actorId)
+    [Route("{id}")]
+    public async Task<IActionResult> Edit([FromBody] RequestActor editActor,[FromRoute] int id)
     {
-        await _actorService.EditAsync(editActor, actorId);
+        await _actorService.EditAsync(editActor, id);
         return Ok();
     }
 
     [HttpPut("movie")]
-    public async Task<IActionResult> EditMovieActors(EditMovieActors editMovieActors)
+    public async Task<IActionResult> EditMovieActors([FromBody] EditMovieActors editMovieActors)
     {
         var movie = await _movieService.GetMovieAsync(editMovieActors.MovieId);
         await _actorService.EditMovieActorsAsync(movie, editMovieActors);
@@ -57,7 +58,7 @@ public class ActorController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add(RequestActor reqActor)
+    public async Task<IActionResult> Add([FromBody] RequestActor reqActor)
     {
         await _actorService.AddAsync(reqActor);
         return Ok();

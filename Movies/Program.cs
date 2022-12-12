@@ -37,7 +37,7 @@ builder.Services.AddScoped<IDirectorService, DirectorService>();
 builder.Services.AddScoped<IActorService, ActorService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IImageService, ImageService>();
-
+builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddAuthorization(options =>
 {

@@ -25,6 +25,7 @@ public class ImageController : ControllerBase
         }
 
         var movie = await _movieService.GetMovieAsync(movieId);
+
         return Ok(await _imageService.AddPosterAsync(movie, poster, isMain));
     }
 

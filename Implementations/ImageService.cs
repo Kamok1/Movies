@@ -46,7 +46,7 @@ public class ImageService : IImageService
         var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PostersPath, folderName);
         var fileName = $"{movie.Posters.Count + 1}.jpg";
 
-        var saveFileTask = _fileService.SaveFile(file, fileName, Path.Combine(folderPath, fileName));
+        var saveFileTask = _fileService.SaveFile(file, fileName, folderPath);
 
         if (isMain)
             movie.Posters.ForEach(poster => poster.IsMain = false);
@@ -59,6 +59,7 @@ public class ImageService : IImageService
         });
 
         await saveFileTask;
+        //usuwanie zdjec jak nie przejdzie dodawania filmu
         return await _db.SaveChangesAsync() != 0;
     }
 
@@ -77,7 +78,7 @@ public class ImageService : IImageService
         var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PicturesPath, folderName);
         var fileName = $"{movie.Pictures.Count + 1}.jpg";
 
-        var saveFileTask = _fileService.SaveFile(file, fileName, Path.Combine(folderPath, fileName));
+        var saveFileTask = _fileService.SaveFile(file, fileName, folderPath);
 
 
 

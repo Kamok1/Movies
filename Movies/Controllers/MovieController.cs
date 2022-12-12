@@ -23,7 +23,7 @@ public class MovieController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetMovies(int id, int year, string? title, int genreId, int directorId, int actorId)
     {
-        if (id != 0)
+        if (id > 0)
             return Ok(await _movieService.GetMovieDtoAsync(id));
         return Ok(await _movieService.GetMoviesDtoAsync(year, title, genreId, directorId, actorId));
     }

@@ -1,7 +1,22 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Linq.Expressions;
+using Microsoft.Extensions.Configuration;
+using Models.Settings;
+
 public static class MyExtensions
 {
     private static readonly Random Rand = new();
+    private static readonly AppSettings AppSetting = new();
+    static MyExtensions()
+    {
+        new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build()
+            .GetSection("AppSettings")
+            .Bind(AppSetting);
+    }
+
+
     public static bool IsNullOrEmpty<T>(this IEnumerable<T>? query)
     {
         return query == null || query.Any() == false;
@@ -16,6 +31,35 @@ public static class MyExtensions
         {
             action(item);
         }
+    }
+    public static IQueryable<T> Pagination<T>(this IQueryable<T> query, int page, int pageSize)
+    {
+        if (page <= 0)
+            return query;
+        if (pageSize <= 0)
+            pageSize = AppSetting.PageSize;
+
+        return query.Skip(pageSize * --page)
+            .Take(pageSize);
+    }
+    public static IQueryable<T> OrderByPropertyName<T>(this IQueryable<T> query, string sortField)
+    {
+        var method = "OrderByDescending";
+        if (sortField.Contains("-"))
+        {
+            method = "OrderBy";
+            sortField = sortField.Replace("-", "");
+        }
+
+        if (typeof(T).GetMethod($"get_{sortField}") == default)
+            return query;
+
+        var param = Expression.Parameter(typeof(T));
+        var prop = Expression.Property(param, sortField);
+        var exp = Expression.Lambda(prop, param);
+        var types = new[] { query.ElementType, exp.Body.Type };
+        var rs = Expression.Call(typeof(Queryable), method, types, query.Expression, exp);
+        return query.Provider.CreateQuery<T>(rs);
     }
 
 }

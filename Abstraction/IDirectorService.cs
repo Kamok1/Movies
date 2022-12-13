@@ -1,5 +1,4 @@
-﻿using Data.Migrations;
-using Data.Models;
+﻿using Data.Models;
 using Models.Director;
 
 namespace Abstractions;

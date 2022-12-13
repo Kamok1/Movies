@@ -25,8 +25,8 @@ public class ImageController : ControllerBase
         }
 
         var movie = await _movieService.GetMovieAsync(movieId);
-
-        return Ok(await _imageService.AddPosterAsync(movie, poster, isMain));
+        await _imageService.AddPosterAsync(movie, poster, isMain);
+        return Ok();
     }
 
     [HttpPost]
@@ -34,41 +34,54 @@ public class ImageController : ControllerBase
     public async Task<IActionResult> AddImage([FromRoute] int movieId, IFormFile poster)
     {
         var movie = await _movieService.GetMovieAsync(movieId);
-        return Ok(await _imageService.AddPictureAsync(movie, poster));
+        await _imageService.AddPictureAsync(movie, poster);
+        return Ok();
     }
     [HttpDelete]
     [Route("poster/{path}")]
     public async Task<IActionResult> DeletePoster([FromRoute] string path)
     {
-        return Ok(await _imageService.DeletePosterAsync(path));
+        await _imageService.DeletePosterAsync(path);
+        return Ok();
     }
+
+    [HttpPut]
+    [Route("poster/{path}")]
+    public async Task<IActionResult> EditMainPoster([FromRoute] string path)
+    {
+        await _imageService.EditMainPoster(path);
+        return Ok();
+    }
+
 
     [HttpDelete]
     [Route("image/{path}")]
     public async Task<IActionResult> DeleteImage([FromRoute] string path)
     {
-        return Ok(await _imageService.DeletePictureAsync(path));
+        await _imageService.DeletePictureAsync(path.Replace(@"\\",@"\"));
+        return Ok();
     }
 
     [HttpGet]
     [Route("{movieId}/image")]
     public async Task<IActionResult> GetImages([FromRoute] int movieId)
     {
-        return Ok(await _imageService.GetImages(movieId));
+        var res = await _imageService.GetPicturesDto(movieId);
+        return Ok(res);
     }
 
     [HttpGet]
     [Route("{movieId}/poster")]
     public async Task<IActionResult> GetPosters([FromRoute] int movieId)
     {
-        return Ok(await _imageService.GetPosters(movieId));
+        return Ok(await _imageService.GetPostersDto(movieId));
     }
 
     [HttpGet]
     [Route("{movieId}/poster/main")]
     public async Task<IActionResult> GetMainPoster([FromRoute] int movieId)
     {
-        return Ok(await _imageService.GetMainPoster(movieId));
+        return Ok(await _imageService.GetMainPosterDto(movieId));
     }
 
 }

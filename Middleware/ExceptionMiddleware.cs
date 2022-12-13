@@ -14,7 +14,6 @@ public class ExceptionMiddleware
     {
         _next = next;
     }
-
     public async Task Invoke(HttpContext context)
     {
         try
@@ -26,12 +25,11 @@ public class ExceptionMiddleware
             await HandleExceptionAsync(context, ex);
         }
     }
-
     private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         //todo logger
         ExceptionDetails exceptionDetails = new();
-        int statusCode = 404;
+        int statusCode;
         if (ex is CustomException customEx)
         {
             statusCode = (int)customEx.StatusCode;
@@ -55,7 +53,6 @@ public class ExceptionMiddleware
         await context.Response.WriteAsync(result);
     }
 }
-
 internal record ExceptionDetails()
 {
     public int status { get; set; }

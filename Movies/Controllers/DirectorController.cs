@@ -1,9 +1,7 @@
 ﻿using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Models.Director;
-using Models.Movie;
 
 namespace Movies.Controllers;
 

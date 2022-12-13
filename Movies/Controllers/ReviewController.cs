@@ -1,7 +1,6 @@
 ﻿using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Models.Review;
 
 namespace Movies.Controllers;
@@ -25,10 +24,10 @@ public class ReviewController : ControllerBase
     [HttpGet]
     [AllowAnonymous]
     [Route("{movieId}")]
-    public async Task<IActionResult> GetMovieReviews(int movieId, [FromQuery] int pageSize, [FromQuery] int page)
+    public async Task<IActionResult> GetMovieReviews(int movieId, [FromQuery] int pageSize, [FromQuery] int page, [FromQuery] string orderBy)
 
     {
-        return Ok(await _reviewService.GetMovieReviewsAsync(movieId, page, pageSize));
+        return Ok(await _reviewService.GetMovieReviewsAsync(movieId, page, pageSize, orderBy));
     }
 
     [HttpGet]

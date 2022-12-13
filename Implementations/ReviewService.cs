@@ -32,21 +32,17 @@ public class ReviewService : IReviewService
         return await _db.SaveChangesAsync() != 0 ? review : null;
     }
 
-    public async Task<List<DtoReview>> GetMovieReviewsAsync(int movieId, int page, int pageSize)
+    public async Task<List<DtoReview>> GetMovieReviewsAsync(int movieId, int page, int pageSize, string orderBy)
     {
         var reviews = _db.Review.Where(x => x.Movie.Id == movieId)
             .Include(x => x.User)
             .AsNoTracking();
 
-        if (page <= 0)
-            return await reviews.Select(review => new DtoReview(review)).ToListAsync();
-        if (pageSize <= 0)
-            pageSize = _settings.PageSize;
-
-        return await reviews.Skip(pageSize * --page)
-            .Take(pageSize)
+        return await reviews.OrderByPropertyName(orderBy).Pagination(page, pageSize)
             .Select(review => new DtoReview(review)).ToListAsync();
     }
+
+
 
     public async Task<int> CountMovieReviewsAsync(int movieId)
     {

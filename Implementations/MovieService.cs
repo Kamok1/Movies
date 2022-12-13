@@ -4,19 +4,16 @@ using Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Models.Exceptions;
 using Models.Movie;
-using Models.Settings;
 
 namespace Implementations
 {
     public class MovieService : IMovieService
     {
         private readonly AppDbContext _db;
-        private readonly AppSettings _settings;
 
-        public MovieService(AppDbContext db, AppSettings settings)
+        public MovieService(AppDbContext db)
         {
             _db = db;
-            _settings = settings;
         }
 
         public async Task<List<DtoMovie>> GetMoviesDtoAsync(int? year = null, string? title = null, int? genreId = null,

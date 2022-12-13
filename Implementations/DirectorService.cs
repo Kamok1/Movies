@@ -4,7 +4,6 @@ using Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Models.Director;
 using Models.Exceptions;
-using Models.Movie;
 
 namespace Implementations;
 

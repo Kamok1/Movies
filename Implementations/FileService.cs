@@ -1,7 +1,5 @@
 ﻿using Abstractions;
-using Data;
 using Microsoft.AspNetCore.Http;
-using Models.Settings;
 
 namespace Implementations;
 

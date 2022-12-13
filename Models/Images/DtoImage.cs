@@ -1,5 +1,6 @@
-﻿using Data.Models;
+﻿namespace Models.Images;
 
-namespace Models.Images;
-
-public record DtoImage(string Path);
+public record DtoImage(string Path)
+{
+    public string Path { get; set; } = Path;
+}

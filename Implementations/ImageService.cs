@@ -48,7 +48,7 @@ public class ImageService : IImageService
 
         if (isMain)
             movie.Posters.ForEach(poster => poster.IsMain = false);
-        
+
         movie.Posters.Add(new Poster
         {
             Movie = movie,
@@ -89,7 +89,7 @@ public class ImageService : IImageService
     public async Task EditMainPoster(string path)
     {
         var poster = await GetPoster(path);
-        
+
         var movie = await _db.Movie.Where(movie => movie.Posters.Contains(poster)).Include(movie => movie.Posters)
             .FirstOrDefaultAsync();
         if (movie == default)

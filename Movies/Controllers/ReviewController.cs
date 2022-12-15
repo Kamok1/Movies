@@ -1,6 +1,7 @@
 ﻿using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.General;
 using Models.Review;
 
 namespace Movies.Controllers;
@@ -24,18 +25,10 @@ public class ReviewController : ControllerBase
     [HttpGet]
     [AllowAnonymous]
     [Route("{movieId}")]
-    public async Task<IActionResult> GetMovieReviews(int movieId, [FromQuery] int pageSize, [FromQuery] int page, [FromQuery] string orderBy)
+    public async Task<IActionResult> GetMovieReviews(int movieId, [FromQuery] Filtering filtering)
 
     {
-        return Ok(await _reviewService.GetMovieReviewsAsync(movieId, page, pageSize, orderBy));
-    }
-
-    [HttpGet]
-    [AllowAnonymous]
-    [Route("count/{movieId}")]
-    public async Task<IActionResult> CountMovieReviews([FromRoute] int movieId)
-    {
-        return Ok(await _reviewService.CountMovieReviewsAsync(movieId));
+        return Ok(await _reviewService.GetMovieReviewsAsync(movieId, filtering.Page, filtering.PageSize, filtering.OrderBy));
     }
 
     [HttpPost]
@@ -43,18 +36,18 @@ public class ReviewController : ControllerBase
     public async Task<IActionResult> AddReview([FromBody] RequestReview review, [FromRoute] int movieId)
     {
         var movie = await _movieService.GetMovieAsync(movieId);
-        var user = await _userService.GetUser(httpContext: HttpContext);
-
-        return Ok(await _reviewService.AddAsync(review, movie, user) != null);
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _reviewService.AddAsync(review, movie, user);
+        return Ok();
     }
 
     [HttpPut]
     [Route("{reviewId}")]
-    public async Task<IActionResult> Edit([FromBody] RequestReview review,[FromRoute] int reviewId)
+    public async Task<IActionResult> Edit([FromBody] RequestReview review, [FromRoute] int reviewId)
     {
-        var user = await _userService.GetUser(httpContext: HttpContext);
-
-        return await _reviewService.EditAsync(review, reviewId, user) ? Ok() : Unauthorized();
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _reviewService.EditAsync(review, reviewId, user);
+        return Ok();
     }
 
     [HttpDelete]
@@ -62,6 +55,7 @@ public class ReviewController : ControllerBase
     [Route("{reviewId}")]
     public async Task<IActionResult> Delete([FromRoute] int reviewId)
     {
-        return Ok(await _reviewService.DeleteAsync(reviewId));
+        await _reviewService.DeleteAsync(reviewId);
+        return Ok();
     }
 }

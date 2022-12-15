@@ -30,10 +30,10 @@ namespace Implementations
         {
             await _db.Entry(movie).Collection(m => m.Actors).LoadAsync();
 
-            var actorsTask = editMovieActors.ActorsId.Select( async id=> await GetActorAsync(id));
+            var actorsTask = editMovieActors.ActorsId.Select(async id => await GetActorAsync(id));
             var actors = await Task.WhenAll(actorsTask);
             movie.Actors = actors;
-            if(await _db.SaveChangesAsync() == 0)
+            if (await _db.SaveChangesAsync() == 0)
                 throw new EditingException<Movie>();
         }
 
@@ -46,7 +46,7 @@ namespace Implementations
                 Description = reqActor.Description,
             };
             await _db.Actor.AddAsync(actor);
-            if(await _db.SaveChangesAsync() == 0)
+            if (await _db.SaveChangesAsync() == 0)
                 throw new AddingException<Actor>();
         }
 

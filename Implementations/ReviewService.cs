@@ -2,22 +2,20 @@
 using Data;
 using Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Models.Exceptions;
 using Models.Review;
-using Models.Settings;
 
 namespace Implementations;
 
 public class ReviewService : IReviewService
 {
     private readonly AppDbContext _db;
-    private readonly AppSettings _settings;
 
-    public ReviewService(AppDbContext db, AppSettings settings)
+    public ReviewService(AppDbContext db)
     {
         _db = db;
-        _settings = settings;
     }
-    public async Task<Review?> AddAsync(RequestReview reqModel, Movie movie, User user)
+    public async Task AddAsync(RequestReview reqModel, Movie movie, User user)
     {
         var review = new Review
         {
@@ -29,9 +27,9 @@ public class ReviewService : IReviewService
             Title = reqModel.Title
         };
         movie.Reviews.Add(review);
-        return await _db.SaveChangesAsync() != 0 ? review : null;
+        if (await _db.SaveChangesAsync() == 0)
+            throw new AddingException<Review>();
     }
-
     public async Task<List<DtoReview>> GetMovieReviewsAsync(int movieId, int page, int pageSize, string orderBy)
     {
         var reviews = _db.Review.Where(x => x.Movie.Id == movieId)
@@ -41,31 +39,25 @@ public class ReviewService : IReviewService
         return await reviews.OrderByPropertyName(orderBy).Pagination(page, pageSize)
             .Select(review => new DtoReview(review)).ToListAsync();
     }
-
-
-
-    public async Task<int> CountMovieReviewsAsync(int movieId)
+    public async Task EditAsync(RequestReview reqReview, int reviewId, User user)
     {
-        return await _db.Review.Where(x => x.Movie.Id == movieId).CountAsync();
-    }
-
-    public async Task<bool> EditAsync(RequestReview reqReview, int reviewId, User user)
-    {
-        var review = await _db.Review.Where(x => x.Id == reviewId).Include(x=>x.User).FirstOrDefaultAsync();
+        var review = await _db.Review.Where(x => x.Id == reviewId).Include(x => x.User).FirstOrDefaultAsync();
         if (review == null || review.User != user)
-            return false;
+            throw new NotFoundException<Review>();
 
         review.Rate = reqReview.Rate;
         review.Body = reqReview.Body;
         review.Title = reqReview.Title;
         _db.Review.Update(review);
-        return await _db.SaveChangesAsync() != 0;
+        if (await _db.SaveChangesAsync() == 0)
+            throw new EditingException<Review>();
     }
 
-    public async Task<bool> DeleteAsync(int reviewId)
+    public async Task DeleteAsync(int reviewId)
     {
         var review = await _db.Review.FindAsync(reviewId);
         if (review != null) _db.Review.Remove(review);
-        return await _db.SaveChangesAsync() != 0;
+        if (await _db.SaveChangesAsync() == 0)
+            throw new DeletingException<Review>();
     }
 }

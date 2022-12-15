@@ -5,9 +5,8 @@ namespace Abstractions;
 
 public interface IReviewService
 {
-    Task<Review?> AddAsync(RequestReview review, Movie movie, User user);
+    Task AddAsync(RequestReview review, Movie movie, User user);
     Task<List<DtoReview>> GetMovieReviewsAsync(int movieId, int page, int pageSize, string orderBy);
-    Task<int> CountMovieReviewsAsync(int movieId);
-    Task<bool> EditAsync(RequestReview review, int reviewId, User user);
-    Task<bool> DeleteAsync(int reviewId);
+    Task EditAsync(RequestReview review, int reviewId, User user);
+    Task DeleteAsync(int reviewId);
 }

@@ -1,8 +1,6 @@
 ﻿using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Models.Movie;
 using Models.User;
 
 namespace Movies.Controllers;
@@ -13,8 +11,6 @@ public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly IMovieService _movieService;
-    
-
     public UserController(IUserService userService, IMovieService movieService)
     {
         _userService = userService;
@@ -25,8 +21,7 @@ public class UserController : ControllerBase
     [Route("me")]
     public async Task<IActionResult> GetMyProfile()
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        return user == null ? NotFound() : Ok(new DtoUser(user));
+        return Ok(await _userService.GetUserDto(httpContext: HttpContext));
     }
 
 
@@ -34,16 +29,18 @@ public class UserController : ControllerBase
     [Route("me/password")]
     public async Task<IActionResult> ChangeMyPassword([FromBody] PasswordChange passwords)
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        return user == null ? NotFound() : Ok(await _userService.ChangePassword(user, passwords));
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _userService.ChangePasswordAsync(user, passwords);
+        return Ok();
     }
 
     [HttpPut]
     [Route("me/email")]
     public async Task<IActionResult> ChangeMyEmail([FromBody] EmailChange editEmail)
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        return user == null ? NotFound() : Ok(await _userService.ChangeEmail(user, editEmail));
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _userService.ChangeEmailAsync(user, editEmail);
+        return Ok();
         //todo dorbić dobry serwis jakiś z potwierdzeniami
     }
 
@@ -51,73 +48,67 @@ public class UserController : ControllerBase
     [Route("me/profile")]
     public async Task<IActionResult> EditMyProfile([FromBody] EditUserProfile editProfile)
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        return user == null ? NotFound() : Ok(await _userService.EditProfile(user, editProfile));
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _userService.EditProfileAsync(user, editProfile);
+        return Ok();
     }
 
     [HttpDelete]
     [Route("me")]
     public async Task<IActionResult> DeleteMe()
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        return user != null ? Ok(await _userService.DeleteAsync(user)) : NotFound();
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _userService.DeleteAsync(user);
+        return Ok();
     }
 
     [HttpGet]
     [Route("me/movies")]
     public async Task<IActionResult> GetMyMovies()
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        if (user == null)
-            return NotFound();
-
-        var movies = await _movieService.GetUserMoviesAsync(user.Id);
-        return Ok(movies.Select(movie => new DtoMovie(movie)));
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        return Ok(await _movieService.GetUserMoviesAsync(user.Id));
     }
 
     [HttpDelete]
     [Route("me/movies/{movieId}")]
     public async Task<IActionResult> DeleteFromMyMovies([FromRoute] int movieId)
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        if (user == null)
-            return NotFound();
-
-        var movies = await _movieService.DeleteFromUserMovies(user, movieId);
-        return movies ? Ok() : NotFound();
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _movieService.DeleteFromUserMovies(user, movieId);
+        return Ok();
     }
 
     [HttpPut]
     [Route("me/movies/{movieId}")]
     public async Task<IActionResult> AddToMyMovies([FromRoute] int movieId)
     {
-        var user = await _userService.GetUsersQuery(httpContext: HttpContext).FirstOrDefaultAsync();
-        return user != null ? Ok(await _movieService.AddUserMovieAsync(user, movieId)) : NotFound();
+        var user = await _userService.GetUserAsync(httpContext: HttpContext);
+        await _movieService.AddUserMovieAsync(user, movieId);
+        return Ok();
     }
 
-
     [Authorize(Roles = "Admin")]
-    [HttpDelete("user/{userId}")]
+    [HttpDelete("{userId}")]
     public async Task<IActionResult> DeleteUser([FromRoute] int userId)
     {
-        var user = await _userService.GetUsersQuery(userId).FirstOrDefaultAsync();
-        return user != default ? Ok(await _userService.DeleteAsync(user)) : NotFound();
+        var user = await _userService.GetUserAsync(userId);
+        await _userService.DeleteAsync(user);
+        return Ok();
     }
 
     [HttpGet]
     [Route("{userId}/movies")]
     public async Task<IActionResult> GetUserMovies([FromRoute] int userId)
     {
-        var movies = await _movieService.GetUserMoviesAsync(userId);
-        return Ok(movies.Select(movie => new DtoMovie(movie)));
+        await _movieService.GetUserMoviesAsync(userId);
+        return Ok();
     }
 
     [HttpGet]
-    [Route("{idUser}/profile")]
-    public async Task<IActionResult> GetProfile([FromRoute] int idUser)
+    [Route("{userId}/profile")]
+    public async Task<IActionResult> GetProfile([FromRoute] int userId)
     {
-        var user = await _userService.GetUsersQuery(idUser).FirstOrDefaultAsync();
-        return user == default ? Ok(new DtoUser(user!)) : NotFound();
+        return Ok(await _userService.GetUserDto(userId));
     }
-    
 }

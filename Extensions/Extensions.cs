@@ -1,6 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Models.Settings;
+using System.Linq.Expressions;
 
 public static class MyExtensions
 {
@@ -21,9 +22,16 @@ public static class MyExtensions
     {
         return query == null || query.Any() == false;
     }
-    public static T? GetRandom<T> (this IQueryable<T> collection)
+    public static async Task<T?> GetRandom<T>(this IQueryable<T> collection)
     {
-        return collection.IsNullOrEmpty() ? default : collection.ToList()[Rand.Next(collection.Count())];
+        return collection.IsNullOrEmpty()
+            ? default
+            : await collection.OrderBy(x => Guid.NewGuid()).FirstOrDefaultAsync();
+    }
+
+    public static bool IsPositive(this int? number)
+    {
+        return (number ?? 0) > 0;
     }
     public static void ForEach<T>(this ICollection<T> collection, Action<T> action)
     {

@@ -43,7 +43,7 @@ public class DirectorService : IDirectorService
             DateOfBirth = addDirector.DateOfBirth,
         };
         await _db.Director.AddAsync(director);
-        if(await _db.SaveChangesAsync() == 0)
+        if (await _db.SaveChangesAsync() == 0)
             throw new AddingException<Director>();
     }
 

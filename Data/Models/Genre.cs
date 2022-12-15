@@ -10,7 +10,7 @@ public record Genre
     [MaxLength(100)]
     public string Name { get; set; }
     public virtual ICollection<Movie> Movies { get; set; }
-    
-    public Genre(){}
+
+    public Genre() { }
     public Genre(string name) => Name = name;
 }

@@ -6,17 +6,14 @@ namespace Abstractions;
 public interface IMovieService
 {
     Task<DtoMovie> GetMovieDtoAsync(int id);
-    Task<List<DtoMovie>> GetMoviesDtoAsync(int? year = null, string? title = null, int? genreId = null,
-        int? directorId = null, int? actorId = null);
     Task<Movie> GetMovieAsync(int id);
-    DtoMovie GetRandomDtoMovie(int? year = null, string? title = null, int? genreId = null,
+    Task<List<DtoMovie>> GetMoviesDtoAsync(int year, string? title, int genreId, int directorId, int actorId, int page, int pageSize, string orderBy);
+    Task<List<DtoMovie>> GetUserMoviesAsync(int id);
+    Task<DtoMovie> GetRandomDtoMovie(int? year = null, string? title = null, int? genreId = null,
         int? directorId = null, int? actorId = null);
-    IQueryable<Movie> GetMoviesQuery(int? year = null, string? title = null, int? genreId = null, int? directorId = null,
-        int? actorId = null, bool includeReviews = true, bool includeActors = false, bool includePoster = true, bool asNoTracking = false);
-    Task<Movie> AddAsync(RequestMovie model);
-    Task<Movie> EditAsync(RequestMovie model, int movieId);
-    Task<bool> Delete(int id);
-    Task<List<Movie>> GetUserMoviesAsync(int id);
-    Task<bool> AddUserMovieAsync(User user, int movieId);
-    Task<bool> DeleteFromUserMovies(User user, int movieId);
+    Task AddAsync(RequestMovie model);
+    Task EditAsync(RequestMovie model, int movieId);
+    Task Delete(int id);
+    Task AddUserMovieAsync(User user, int movieId);
+    Task DeleteFromUserMovies(User user, int movieId);
 }

@@ -1,4 +1,3 @@
-using System.Text;
 using Abstractions;
 using Data;
 using Implementations;
@@ -7,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Middleware;
 using Models.Settings;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +42,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("EverybodyAuthorized",
-        policy => policy.RequireRole("User","Admin"));
+        policy => policy.RequireRole("User", "Admin"));
 });
 builder.Services.AddCors();
 

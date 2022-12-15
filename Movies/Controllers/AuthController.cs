@@ -1,8 +1,7 @@
 ﻿using Abstractions;
+using Extensions;
 using Implementations;
 using Microsoft.AspNetCore.Mvc;
-using Extensions;
-using Microsoft.EntityFrameworkCore;
 using Models.Settings;
 using Models.User;
 
@@ -14,6 +13,7 @@ public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly JwtSettings _jwtSettings;
+
     public AuthController(IUserService userService, JwtSettings jwtSettings)
     {
         _userService = userService;
@@ -23,18 +23,16 @@ public class AuthController : ControllerBase
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> Register(UserRegisterRequest reqUser)
-    { 
-        return await _userService.CreateAsync(reqUser) != null ? Ok() : BadRequest();
+    {
+        await _userService.CreateAsync(reqUser);
+        return Ok();
     }
 
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> Login(LoginModel reqLogin)
     {
-        var user = await _userService.GetUsersQuery(login: reqLogin.Login).FirstOrDefaultAsync();
-        if(user == null)
-            return NotFound();
-
+        var user = await _userService.GetUserAsync(login: reqLogin.Login);
         if (PasswordServices.VerifyPassword(reqLogin.Password, user.Password, user.PasswordSalt) == false)
             return Unauthorized();
 

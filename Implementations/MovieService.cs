@@ -16,12 +16,18 @@ namespace Implementations
             _db = db;
         }
 
-        public async Task<List<DtoMovie>> GetMoviesDtoAsync(int? year = null, string? title = null, int? genreId = null,
-            int? directorId = null, int? actorId = null)
+        public async Task<List<DtoMovie>> GetMoviesDtoAsync(int year, string? title, int genreId, int directorId, int actorId, int page,
+            int pageSize, string orderBy)
         {
-            var movies = await GetMoviesQuery(year, title, genreId, directorId, actorId, asNoTracking: true).ToListAsync();
-            return movies.Select(movie => new DtoMovie(movie)).ToList();
+            var movies = GetMoviesQuery(year, title, genreId, directorId, actorId, asNoTracking: true);
+            if (orderBy.Contains("Rating"))
+                movies = orderBy.Contains("-") ? movies.OrderByDescending(movie => movie.Reviews.Average(x => x.Rate))
+                        : movies.OrderBy(movie => movie.Reviews.Average(x => x.Rate));
+
+            ; return await movies.OrderByPropertyName(orderBy).Pagination(page, pageSize)
+                            .Select(movie => new DtoMovie(movie)).ToListAsync();
         }
+
         public async Task<DtoMovie> GetMovieDtoAsync(int id)
         {
             var movie = await _db.Movie.FindAsync(id);
@@ -31,18 +37,22 @@ namespace Implementations
         public async Task<Movie> GetMovieAsync(int id)
         {
             var movie = await _db.Movie.FindAsync(id);
-
             return movie ?? throw new NotFoundException<Movie>();
         }
 
-        public DtoMovie GetRandomDtoMovie(int? year = null, string? title = null, int? genreId = null, int? directorId = null,
+        public async Task<DtoMovie> GetRandomDtoMovie(int? year = null, string? title = null, int? genreId = null, int? directorId = null,
             int? actorId = null)
         {
-            var movie = GetMoviesQuery(year, title, genreId, directorId, actorId).GetRandom();
+            var movie = await GetMoviesQuery(year, title, genreId, directorId, actorId).GetRandom();
             return movie == default ? new DtoMovie() : new DtoMovie(movie);
         }
+        public async Task<List<DtoMovie>> GetUserMoviesAsync(int id)
+        {
+            var movies = GetMoviesQuery().Where(x => x.UsersFavorite.Any(user => user.Id == id));
+            return await movies.Select(movie => new DtoMovie(movie)).ToListAsync();
+        }
 
-        public async Task<Movie> AddAsync(RequestMovie reqModel)
+        public async Task AddAsync(RequestMovie reqModel)
         {
             var newMovie = new Movie
             {
@@ -52,10 +62,10 @@ namespace Implementations
             };
 
             await _db.Movie.AddAsync(newMovie);
-            return await _db.SaveChangesAsync() != 0 ? newMovie : throw new AddingException<Movie>();
+            if (await _db.SaveChangesAsync() == 0)
+                throw new AddingException<Movie>();
         }
-
-        public async Task<Movie> EditAsync(RequestMovie reqModel, int id)
+        public async Task EditAsync(RequestMovie reqModel, int id)
         {
             var movie = await GetMovieAsync(id);
 
@@ -63,85 +73,73 @@ namespace Implementations
             movie.Title = reqModel.Title;
             movie.ReleaseDate = reqModel.ReleaseDate;
 
-            return await _db.SaveChangesAsync() != 0 ? movie : throw new EditingException<Movie>();
+            if (await _db.SaveChangesAsync() == 0)
+                throw new EditingException<Movie>();
         }
-
-
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
-            var movie = await GetMovieAsync(id);
-            
-            _db.Movie.Remove(movie);
-            return await _db.SaveChangesAsync() != 0;
+            _db.Movie.Remove(await GetMovieAsync(id));
+            if (await _db.SaveChangesAsync() == 0)
+                throw new DeletingException<Movie>();
         }
-
-
-        public async Task<List<Movie>> GetUserMoviesAsync(int id)
-        {
-            var query = GetMoviesQuery();
-            return await query.Where(x => x.UsersFavorite.Any(user => user.Id == id)).ToListAsync();
-        }
-
-        public async Task<bool> AddUserMovieAsync(User user, int movieId)
+        public async Task AddUserMovieAsync(User user, int movieId)
         {
             if (user.UserFavouriteMovies.Any(x => x.Id == movieId))
-                return false;
+                return;
 
             var movie = await GetMovieAsync(movieId);
             user.UserFavouriteMovies.Add(movie);
             _db.User.Update(user);
-            return await _db.SaveChangesAsync() != 0;
+            if (await _db.SaveChangesAsync() == 0)
+                throw new AddingException<Movie>();
         }
-
-        public async Task<bool> DeleteFromUserMovies(User user, int movieId)
+        public async Task DeleteFromUserMovies(User user, int movieId)
         {
 
             if (user.UserFavouriteMovies.Any(x => x.Id != movieId))
-                return false;
+                return;
 
             var movie = await GetMovieAsync(movieId);
-
             user.UserFavouriteMovies.Remove(movie);
             _db.User.Update(user);
-            return await _db.SaveChangesAsync() != 0;
+            if (await _db.SaveChangesAsync() == 0)
+                throw new DeletingException<Movie>();
         }
-
-
-        public IQueryable<Movie> GetMoviesQuery(int? year = null, string? title = null, int? genreId = null, int? directorId = null,
-            int? actorId = null, bool includeReviews = true, bool includeActors = false,bool includePoster = true,  bool asNoTracking = false)
+        private IQueryable<Movie> GetMoviesQuery(int? year = null, string? title = null, int? genreId = null, int? directorId = null,
+            int? actorId = null, bool includeReviews = true, bool includeActors = false, bool includePoster = true, bool asNoTracking = false)
         {
-            var query = PrepareQuery(includeReviews, includeActors, includePoster, asNoTracking)!;
+            var query = PrepareQuery(includePoster, includeReviews, includeActors, asNoTracking);
 
-            if ((year ?? 0) > 0)
-                query = query.Where(x => x.ReleaseDate.Year == year);
-            if ((genreId ?? 0) > 0)
-                query = query.Where(x => x.Genres.Any(x => x.Id == genreId));
-            if ((directorId ?? 0) > 0)
-                query = query.Where(x => x.Director != null && x.Director.Id == directorId);
-            if ((actorId ?? 0) > 0)
-                query = query.Where(x => x.Actors.Any(d => d.Id == actorId));
-            if (title != null)
-                query = query.Where(x => x.Title.Contains(title));
+            if (year.IsPositive())
+                query = query.Where(movie => movie.ReleaseDate.Year == year);
+            if (genreId.IsPositive())
+                query = query.Where(movie => movie.Genres.Any(genre => genre.Id == genreId));
+            if (directorId.IsPositive())
+                query = query.Where(movie => movie.Director != null && movie.Director.Id == directorId);
+            if (actorId.IsPositive())
+                query = query.Where(movie => movie.Actors.Any(actor => actor.Id == actorId));
+            if (string.IsNullOrEmpty(title))
+                query = query.Where(movie => movie.Title.Contains(title!));
 
             return query;
         }
         private IQueryable<Movie> PrepareQuery(bool includePoster, bool includeReviews, bool includeActors, bool asNoTracking)
         {
             var query = _db.Movie
-                .Include(x => x.Genres)
-                .Include(x => x.Director)
+                .Include(movie => movie.Genres)
+                .Include(movie => movie.Director)
                 .AsQueryable();
 
             if (includePoster)
                 query = query.Include(movie => movie.Posters);
-            if (includeReviews) 
-                query = query.Include(x => x.Reviews).ThenInclude(x => x.User);
+            if (includeReviews)
+                query = query.Include(movie => movie.Reviews).ThenInclude(review => review.User);
             if (includeActors)
                 query = query.Include(movie => movie.Actors);
             if (asNoTracking)
                 query = query.AsNoTracking();
 
-            return query;   
+            return query;
         }
     }
 }

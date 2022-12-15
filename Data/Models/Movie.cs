@@ -19,9 +19,9 @@ public class Movie
     public virtual ICollection<Poster> Posters { get; set; } = new List<Poster>();
     public virtual ICollection<Picture> Pictures { get; set; } = new List<Picture>();
     public virtual ICollection<Actor> Actors { get; set; } = new List<Actor>();
-    public virtual ICollection<Genre> Genres { get; set;} = new List<Genre>();
+    public virtual ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public virtual ICollection<User> UsersFavorite { get; set; } = new List<User>();
-    public virtual ICollection<Review> Reviews { get; set;} = new List<Review>();
-    public virtual Director? Director { get; set; } 
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+    public virtual Director? Director { get; set; }
 
 };

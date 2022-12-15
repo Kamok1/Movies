@@ -1,6 +1,6 @@
-﻿using System.Security.Claims;
-using Implementations;
+﻿using Implementations;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Middleware;
 

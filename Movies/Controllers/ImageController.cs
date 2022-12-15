@@ -58,7 +58,7 @@ public class ImageController : ControllerBase
     [Route("image/{path}")]
     public async Task<IActionResult> DeleteImage([FromRoute] string path)
     {
-        await _imageService.DeletePictureAsync(path.Replace(@"\\",@"\"));
+        await _imageService.DeletePictureAsync(path.Replace(@"\\", @"\"));
         return Ok();
     }
 

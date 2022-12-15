@@ -1,6 +1,7 @@
 ﻿using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.General;
 using Models.Movie;
 
 namespace Movies.Controllers;
@@ -21,11 +22,11 @@ public class MovieController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetMovies(int id, int year, string? title, int genreId, int directorId, int actorId)
+    public async Task<IActionResult> GetMovies(int id, int year, string? title, int genreId, int directorId, int actorId, [FromQuery] Filtering filtering)
     {
         if (id > 0)
             return Ok(await _movieService.GetMovieDtoAsync(id));
-        return Ok(await _movieService.GetMoviesDtoAsync(year, title, genreId, directorId, actorId));
+        return Ok(await _movieService.GetMoviesDtoAsync(year, title, genreId, directorId, actorId, filtering.Page, filtering.PageSize, filtering.OrderBy));
     }
 
     [HttpGet]
@@ -39,7 +40,7 @@ public class MovieController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] RequestMovie reqMovie)
     {
-        var movie = await _movieService.AddAsync(reqMovie);
+        await _movieService.AddAsync(reqMovie);
         return Ok();
     }
 
@@ -57,6 +58,7 @@ public class MovieController : ControllerBase
     {
         var movie = await _movieService.GetMovieAsync(movieId);
         _imageService.DeleteAllImages(movie);
-        return await _movieService.Delete(movieId) ? Ok() : NotFound();
+        await _movieService.Delete(movieId);
+        return Ok();
     }
 }

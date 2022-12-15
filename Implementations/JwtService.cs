@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Implementations;
 
-public static class JwtService 
+public static class JwtService
 {
     public static IEnumerable<Claim> DecodeToken(string token)
     {

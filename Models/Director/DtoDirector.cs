@@ -7,7 +7,7 @@ public record DtoDirector
     public int Id { get; init; }
     public DateTime DateOfBirth { get; init; }
 
-    public DtoDirector(Data.Models.Director director) 
+    public DtoDirector(Data.Models.Director director)
     {
         Description = director.Description;
         Id = director.Id;

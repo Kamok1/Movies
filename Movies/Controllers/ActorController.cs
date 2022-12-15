@@ -41,7 +41,7 @@ public class ActorController : ControllerBase
 
     [HttpPut]
     [Route("{id}")]
-    public async Task<IActionResult> Edit([FromBody] RequestActor editActor,[FromRoute] int id)
+    public async Task<IActionResult> Edit([FromBody] RequestActor editActor, [FromRoute] int id)
     {
         await _actorService.EditAsync(editActor, id);
         return Ok();

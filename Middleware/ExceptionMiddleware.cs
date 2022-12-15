@@ -1,8 +1,8 @@
-﻿using System.Net;
-using System.Text.Json;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Models.Exceptions;
+using System.Net;
+using System.Text.Json;
 
 namespace Middleware;
 

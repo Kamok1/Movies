@@ -118,7 +118,7 @@ namespace Implementations
                 query = query.Where(movie => movie.Director != null && movie.Director.Id == directorId);
             if (actorId.IsPositive())
                 query = query.Where(movie => movie.Actors.Any(actor => actor.Id == actorId));
-            if (string.IsNullOrEmpty(title))
+            if (!string.IsNullOrEmpty(title))
                 query = query.Where(movie => movie.Title.Contains(title!));
 
             return query;

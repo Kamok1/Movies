@@ -44,29 +44,30 @@ public static class MyExtensions
     {
         if (page <= 0)
             return query;
+
         if (pageSize <= 0)
             pageSize = AppSetting.PageSize;
-
         return query.Skip(pageSize * --page)
             .Take(pageSize);
     }
     public static IQueryable<T> OrderByPropertyName<T>(this IQueryable<T> query, string sortField)
     {
         var method = "OrderByDescending";
+        var genericType = typeof(T);
         if (sortField.Contains("-"))
         {
             method = "OrderBy";
             sortField = sortField.Replace("-", "");
         }
 
-        if (typeof(T).GetMethod($"get_{sortField}") == default)
+        if (genericType.GetMethod($"get_{sortField}") == default)
             return query;
 
-        var param = Expression.Parameter(typeof(T));
-        var prop = Expression.Property(param, sortField);
-        var exp = Expression.Lambda(prop, param);
-        var types = new[] { query.ElementType, exp.Body.Type };
-        var rs = Expression.Call(typeof(Queryable), method, types, query.Expression, exp);
+        var param = Expression.Parameter(genericType); //param = T e.g Movie
+        var prop = Expression.Property(param, sortField); // prop = T.Field e.g Movie.Id
+        var exp = Expression.Lambda(prop, param); // exp = T => T.Field eg. Movie => Movie.Id
+        var types = new[] { genericType, exp.Body.Type };
+        var rs = Expression.Call(typeof(Queryable), method, types, query.Expression, exp); // E.g OrderByDescending(Movie => Movie.Id
         return query.Provider.CreateQuery<T>(rs);
     }
 

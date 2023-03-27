@@ -23,14 +23,15 @@ namespace Implementations
             if (orderBy.Contains("Rating"))
                 movies = orderBy.Contains("-") ? movies.OrderByDescending(movie => movie.Reviews.Average(x => x.Rate))
                         : movies.OrderBy(movie => movie.Reviews.Average(x => x.Rate));
-
-            ; return await movies.OrderByPropertyName(orderBy).Pagination(page, pageSize)
+            return await movies.OrderByPropertyName(orderBy).Pagination(page, pageSize)
                             .Select(movie => new DtoMovie(movie)).ToListAsync();
         }
 
         public async Task<DtoMovie> GetMovieDtoAsync(int id)
         {
             var movie = await _db.Movie.FindAsync(id);
+            await _db.Entry(movie).Collection(m => m.Reviews).LoadAsync();
+            await _db.Entry(movie).Collection(m => m.Posters).LoadAsync();
             return movie == default ? new DtoMovie() : new DtoMovie(movie);
         }
 
@@ -76,7 +77,7 @@ namespace Implementations
             if (await _db.SaveChangesAsync() == 0)
                 throw new EditingException<Movie>();
         }
-        public async Task Delete(int id)
+        public async Task DeleteAsync(int id)
         {
             _db.Movie.Remove(await GetMovieAsync(id));
             if (await _db.SaveChangesAsync() == 0)

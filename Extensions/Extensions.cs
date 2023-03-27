@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 
 public static class MyExtensions
 {
-    private static readonly Random Rand = new();
     private static readonly AppSettings AppSetting = new();
     static MyExtensions()
     {
@@ -35,7 +34,7 @@ public static class MyExtensions
     }
     public static void ForEach<T>(this ICollection<T> collection, Action<T> action)
     {
-        foreach (T item in collection)
+        foreach (var item in collection)
         {
             action(item);
         }

@@ -49,7 +49,7 @@ public class ImageController : ControllerBase
     [Route("poster/{path}")]
     public async Task<IActionResult> EditMainPoster([FromRoute] string path)
     {
-        await _imageService.EditMainPoster(path);
+        await _imageService.EditMainPosterAsync(path);
         return Ok();
     }
 
@@ -66,7 +66,7 @@ public class ImageController : ControllerBase
     [Route("{movieId}/image")]
     public async Task<IActionResult> GetImages([FromRoute] int movieId)
     {
-        var res = await _imageService.GetPicturesDto(movieId);
+        var res = await _imageService.GetPicturesDtoAsync(movieId);
         return Ok(res);
     }
 
@@ -74,14 +74,14 @@ public class ImageController : ControllerBase
     [Route("{movieId}/poster")]
     public async Task<IActionResult> GetPosters([FromRoute] int movieId)
     {
-        return Ok(await _imageService.GetPostersDto(movieId));
+        return Ok(await _imageService.GetPostersDtoAsync(movieId));
     }
 
     [HttpGet]
     [Route("{movieId}/poster/main")]
     public async Task<IActionResult> GetMainPoster([FromRoute] int movieId)
     {
-        return Ok(await _imageService.GetMainPosterDto(movieId));
+        return Ok(await _imageService.GetMainPosterDtoAsync(movieId));
     }
 
 }

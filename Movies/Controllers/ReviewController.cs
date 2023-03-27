@@ -1,6 +1,7 @@
 ﻿using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Models.General;
 using Models.Review;
 
@@ -31,10 +32,23 @@ public class ReviewController : ControllerBase
         return Ok(await _reviewService.GetMovieReviewsAsync(movieId, filtering.Page, filtering.PageSize, filtering.OrderBy));
     }
 
+    [HttpGet]
+    [AllowAnonymous]
+    [Route("{movieId}/count")]
+    public async Task<IActionResult> CountMovieReviews(int movieId)
+    {
+        return Ok(await _reviewService.CountMovieReviews(movieId));
+    }
+
     [HttpPost]
     [Route("{movieId}")]
     public async Task<IActionResult> AddReview([FromBody] RequestReview review, [FromRoute] int movieId)
     {
+        if (review.Rate > 10 || review.Rate < 0)
+        {
+            ModelState.AddModelError("Rate", review.Rate > 10 ? "Rate can't be bigger than 10" : "Rate can't be lesser than 0");
+            return ValidationProblem();
+        }
         var movie = await _movieService.GetMovieAsync(movieId);
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
         await _reviewService.AddAsync(review, movie, user);

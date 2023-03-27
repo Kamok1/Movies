@@ -29,7 +29,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton(builder.Configuration.GetSection("AppSettings").Get<AppSettings>());
 builder.Services.AddSingleton(jwtSettings);
-
 builder.Services.AddScoped<IMovieService, MovieService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();

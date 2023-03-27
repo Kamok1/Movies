@@ -30,6 +30,12 @@ public class ReviewService : IReviewService
         if (await _db.SaveChangesAsync() == 0)
             throw new AddingException<Review>();
     }
+
+    public async Task<int> CountMovieReviews(int movieId)
+    {
+        return await _db.Review.Where(review => review.Movie.Id == movieId).CountAsync();
+    }
+
     public async Task<List<DtoReview>> GetMovieReviewsAsync(int movieId, int page, int pageSize, string orderBy)
     {
         var reviews = _db.Review.Where(x => x.Movie.Id == movieId)

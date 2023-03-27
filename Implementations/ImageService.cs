@@ -21,18 +21,18 @@ public class ImageService : IImageService
         _fileService = fileService;
     }
 
-    public async Task<DtoImage> GetMainPosterDto(int movieId)
+    public async Task<DtoImage> GetMainPosterDtoAsync(int movieId)
     {
         var poster = await _db.Poster.Where(poster => poster.Movie.Id == movieId && poster.IsMain).FirstOrDefaultAsync();
         return poster != default ? new DtoImage(poster.Path) : new DtoImage("poster/empty.jpg");
     }
 
-    public async Task<List<DtoImage>> GetPostersDto(int movieId)
+    public async Task<List<DtoImage>> GetPostersDtoAsync(int movieId)
     {
         return await _db.Poster.Where(poster => poster.Movie.Id == movieId).Select(poster => new DtoImage(poster.Path)).ToListAsync();
     }
 
-    public async Task<List<DtoImage>> GetPicturesDto(int movieId)
+    public async Task<List<DtoImage>> GetPicturesDtoAsync(int movieId)
     {
         return await _db.Picture.Where(image => image.Movie.Id == movieId).Select(image => new DtoImage(image.Path)).ToListAsync();
     }
@@ -86,7 +86,7 @@ public class ImageService : IImageService
         if (await _db.SaveChangesAsync() == 0)
             throw new AddingException<Picture>();
     }
-    public async Task EditMainPoster(string path)
+    public async Task EditMainPosterAsync(string path)
     {
         var poster = await GetPoster(path);
 

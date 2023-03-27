@@ -58,7 +58,7 @@ public class MovieController : ControllerBase
     {
         var movie = await _movieService.GetMovieAsync(movieId);
         _imageService.DeleteAllImages(movie);
-        await _movieService.Delete(movieId);
+        await _movieService.DeleteAsync(movieId);
         return Ok();
     }
 }

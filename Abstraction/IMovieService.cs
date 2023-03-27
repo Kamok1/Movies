@@ -13,7 +13,7 @@ public interface IMovieService
         int? directorId = null, int? actorId = null);
     Task AddAsync(RequestMovie model);
     Task EditAsync(RequestMovie model, int movieId);
-    Task Delete(int id);
+    Task DeleteAsync(int id);
     Task AddUserMovieAsync(User user, int movieId);
     Task DeleteFromUserMovies(User user, int movieId);
 }

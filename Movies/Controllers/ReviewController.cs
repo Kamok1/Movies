@@ -1,7 +1,6 @@
 ﻿using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Models.General;
 using Models.Review;
 
@@ -37,7 +36,7 @@ public class ReviewController : ControllerBase
     [Route("{movieId}/count")]
     public async Task<IActionResult> CountMovieReviews(int movieId)
     {
-        return Ok(await _reviewService.CountMovieReviews(movieId));
+        return Ok(await _reviewService.CountMovieReviewsAsync(movieId));
     }
 
     [HttpPost]

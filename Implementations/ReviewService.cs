@@ -31,7 +31,7 @@ public class ReviewService : IReviewService
             throw new AddingException<Review>();
     }
 
-    public async Task<int> CountMovieReviews(int movieId)
+    public async Task<int> CountMovieReviewsAsync(int movieId)
     {
         return await _db.Review.Where(review => review.Movie.Id == movieId).CountAsync();
     }

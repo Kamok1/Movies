@@ -2,6 +2,8 @@
 
 This is the backend service for a movie library that allows users to search for movies, rate and comment on them.
 
+Frontend to this app is still under development (Angular) https://github.com/Kamok1/MoviesAngular
+
 # Features
 
 ### Authorization System

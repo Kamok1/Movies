@@ -40,7 +40,7 @@ public class ImageService : IImageService
     {
         await _db.Entry(movie).Collection(m => m.Posters).LoadAsync();
 
-        var folderName = $"{movie.Title}_{movie.Id}_posters";
+        var folderName = $"{movie.Title.OnlyAllowedCharacters()}_{movie.Id}_posters";
         var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PostersPath, folderName);
         var fileName = $"{movie.Posters.Count + 1}.jpg";
 
@@ -72,7 +72,7 @@ public class ImageService : IImageService
     {
         await _db.Entry(movie).Collection(m => m.Pictures).LoadAsync();
 
-        var folderName = $"{movie.Title}_{movie.Id}_pictures";
+        var folderName = $"{movie.Title.OnlyAllowedCharacters()}_{movie.Id}_pictures";
         var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PicturesPath, folderName);
         var fileName = $"{movie.Pictures.Count + 1}.jpg";
         var saveFileTask = _fileService.SaveFile(file, fileName, folderPath);

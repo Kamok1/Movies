@@ -2,6 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Models.Settings;
 using System.Linq.Expressions;
+using Npgsql.Internal.TypeHandlers.LTreeHandlers;
+using Data.Migrations;
+using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using System.Text.RegularExpressions;
 
 public static class MyExtensions
 {
@@ -26,9 +30,14 @@ public static class MyExtensions
         return collection.IsNullOrEmpty()
             ? default
             : await collection.OrderBy(x => Guid.NewGuid()).FirstOrDefaultAsync();
+  }
+
+    public static string OnlyAllowedCharacters(this string text)
+    {
+      return string.Join("", Regex.Matches(text, @"[a-zA-Z0-9]").Select(match => match.Value));
     }
 
-    public static bool IsPositive(this int? number)
+  public static bool IsPositive(this int? number)
     {
         return (number ?? 0) > 0;
     }

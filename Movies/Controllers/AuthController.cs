@@ -2,6 +2,7 @@
 using Extensions;
 using Implementations;
 using Microsoft.AspNetCore.Mvc;
+using Models.Auth;
 using Models.Settings;
 using Models.User;
 
@@ -35,7 +36,11 @@ public class AuthController : ControllerBase
         var user = await _userService.GetUserAsync(login: reqLogin.Login);
         if (PasswordServices.VerifyPassword(reqLogin.Password, user.Password, user.PasswordSalt) == false)
             return Unauthorized();
-
-        return Ok(JwtService.GetToken(user, _jwtSettings));
+        
+        return Ok(new JwtResponse()
+                  {
+                    Jwt = JwtService.GetToken(user, _jwtSettings),
+                    ExpiresIn = _jwtSettings.Expire
+                  });
     }
 }

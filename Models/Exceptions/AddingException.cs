@@ -4,6 +4,6 @@ namespace Models.Exceptions;
 
 public class AddingException<T> : CustomException
 {
-    public AddingException() : base(HttpStatusCode.Conflict, $"{typeof(T).Name} Can not be added")
+    public AddingException(string? messege = null) : base(HttpStatusCode.Conflict, messege ?? $"{typeof(T).Name} Can not be added")
     { }
 }

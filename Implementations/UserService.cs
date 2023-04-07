@@ -24,10 +24,11 @@ public class UserService : IUserService
 
     public async Task CreateAsync(UserRegisterRequest reqUser)
     {
-        if (_db.User.Any(x => x.Login == reqUser.Name || x.Email == reqUser.Email))
-            throw new AddingException<User>();
-
-        var passwordSalt = GenerateSalt(64);
+        if (_db.User.Any(x => x.Login == reqUser.Name))
+            throw new AddingException<User>("That username is already in use");
+        if (_db.User.Any(x => x.Email == reqUser.Email))
+          throw new AddingException<User>("That e-mail is already in use");
+    var passwordSalt = GenerateSalt(64);
         var password = GenerateSaltedHash(passwordSalt, reqUser.Password);
         var role = await _db.Role.Where(x => x.Name == "User").FirstOrDefaultAsync();
 
@@ -87,6 +88,6 @@ public class UserService : IUserService
             query = query.Where(user => user.Id == userId);
         else if (string.IsNullOrEmpty(login))
             query = query.Where(user => user.Login == login || user.Email == login);
-        return await query.FirstOrDefaultAsync() ?? throw new NotFoundException<User>();
+        return await query.Include(user=>user.Role).FirstOrDefaultAsync() ?? throw new NotFoundException<User>();
     }
 }

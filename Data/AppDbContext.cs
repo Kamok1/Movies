@@ -17,8 +17,12 @@ namespace Data
         public DbSet<Poster> Poster { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+          modelBuilder.Entity<Movie>().Navigation(movie => movie.Genres).AutoInclude();
+          modelBuilder.Entity<Movie>().Navigation(movie => movie.Director).AutoInclude();
+          modelBuilder.Entity<User>().Navigation(user => user.Role).AutoInclude();
+          modelBuilder.Entity<User>().Navigation(user => user.RefreshToken).AutoInclude();
         }
 
-    }
+  }
 
 }

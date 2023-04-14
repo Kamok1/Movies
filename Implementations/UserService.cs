@@ -1,9 +1,11 @@
 ﻿using Abstractions;
 using Data;
 using Data.Models;
+using EfExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Models.Exceptions;
+using Models.Movie;
 using Models.User;
 using static Extensions.PasswordServices;
 
@@ -69,7 +71,41 @@ public class UserService : IUserService
         if (await _db.SaveChangesAsync() == 0)
             throw new EditingException<User>();
     }
-    public async Task DeleteAsync(User reqUser)
+    public async Task<List<DtoMovie>> GetUserMoviesAsync(int id)
+    {
+      var movies = _db.Movie.Include(movie => movie.UsersFavorite)
+        .Where(movie => movie.UsersFavorite.Any(user => user.Id == id));
+      return await movies.Select(movie => new DtoMovie(movie)).ToListAsync();
+    }
+  public bool IsMovieInFavorites(User user, int movieId)
+    {
+      return user.UserFavouriteMovies.Any(movie => movie.Id == movieId);
+    }
+    public async Task AddUserMovieAsync(User user, int movieId)
+    {
+    await _db.Entry(user).Collection(user => user.UserFavouriteMovies).LoadAsync();
+    if (user.UserFavouriteMovies.Any(movie => movie.Id == movieId))
+        return;
+
+      var movie = await _db.Movie.FindOrThrowErrorAsync(movieId);
+      user.UserFavouriteMovies.Add(movie);
+      _db.User.Update(user);
+      if (await _db.SaveChangesAsync() == 0)
+        throw new AddingException<Movie>();
+    }
+    public async Task DeleteFromUserMovies(User user, int movieId)
+    {
+      await _db.Entry(user).Collection(user => user.UserFavouriteMovies).LoadAsync();
+      if (user.UserFavouriteMovies.Any(x => x.Id != movieId))
+        return;
+
+      var movie = await _db.Movie.FindOrThrowErrorAsync(movieId);
+      user.UserFavouriteMovies.Remove(movie);
+      _db.User.Update(user);
+      if (await _db.SaveChangesAsync() == 0)
+        throw new DeletingException<Movie>();
+    }
+  public async Task DeleteAsync(User reqUser)
     {
         _db.User.Remove(reqUser);
         if (await _db.SaveChangesAsync() == 0)
@@ -79,15 +115,20 @@ public class UserService : IUserService
     {
         throw new EditingException<User>();
     }
-    public async Task<User> GetUserAsync(int? id = default, HttpContext? httpContext = default, string? login = null)
+    public async Task<User> GetUserAsync(int? id = default, HttpContext? httpContext = default, string? login = null, string? refreshToken = null)
     {
         var query = _db.User.AsQueryable();
         if (id.IsPositive())
             query = query.Where(user => user.Id == id);
         else if (int.TryParse(httpContext?.Items["UserId"]?.ToString(), out var userId))
             query = query.Where(user => user.Id == userId);
-        else if (string.IsNullOrEmpty(login))
-            query = query.Where(user => user.Login == login || user.Email == login);
-        return await query.Include(user=>user.Role).FirstOrDefaultAsync() ?? throw new NotFoundException<User>();
+        else if (!string.IsNullOrEmpty(login))
+          query = query.Where(user => user.Login == login || user.Email == login);
+        else if (!string.IsNullOrEmpty(refreshToken))
+          query = query.Where(user => user.RefreshToken.Token == refreshToken);
+        else
+          throw new NotFoundException<User>();
+
+        return await query.FirstOrDefaultAsync() ?? throw new NotFoundException<User>();
     }
 }

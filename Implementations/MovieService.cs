@@ -47,11 +47,6 @@ namespace Implementations
             var movie = await GetMoviesQuery(year, title, genreId, directorId, actorId).GetRandom();
             return movie == default ? new DtoMovie() : new DtoMovie(movie);
         }
-        public async Task<List<DtoMovie>> GetUserMoviesAsync(int id)
-        {
-            var movies = GetMoviesQuery().Where(x => x.UsersFavorite.Any(user => user.Id == id));
-            return await movies.Select(movie => new DtoMovie(movie)).ToListAsync();
-        }
 
         public async Task AddAsync(RequestMovie reqModel)
         {
@@ -83,29 +78,7 @@ namespace Implementations
             if (await _db.SaveChangesAsync() == 0)
                 throw new DeletingException<Movie>();
         }
-        public async Task AddUserMovieAsync(User user, int movieId)
-        {
-            if (user.UserFavouriteMovies.Any(x => x.Id == movieId))
-                return;
 
-            var movie = await GetMovieAsync(movieId);
-            user.UserFavouriteMovies.Add(movie);
-            _db.User.Update(user);
-            if (await _db.SaveChangesAsync() == 0)
-                throw new AddingException<Movie>();
-        }
-        public async Task DeleteFromUserMovies(User user, int movieId)
-        {
-
-            if (user.UserFavouriteMovies.Any(x => x.Id != movieId))
-                return;
-
-            var movie = await GetMovieAsync(movieId);
-            user.UserFavouriteMovies.Remove(movie);
-            _db.User.Update(user);
-            if (await _db.SaveChangesAsync() == 0)
-                throw new DeletingException<Movie>();
-        }
         private IQueryable<Movie> GetMoviesQuery(int? year = null, string? title = null, int? genreId = null, int? directorId = null,
             int? actorId = null, bool includeReviews = true, bool includeActors = false, bool includePoster = true, bool asNoTracking = false)
         {
@@ -126,10 +99,7 @@ namespace Implementations
         }
         private IQueryable<Movie> PrepareQuery(bool includePoster, bool includeReviews, bool includeActors, bool asNoTracking)
         {
-            var query = _db.Movie
-                .Include(movie => movie.Genres)
-                .Include(movie => movie.Director)
-                .AsQueryable();
+            var query = _db.Movie.AsQueryable();
 
             if (includePoster)
                 query = query.Include(movie => movie.Posters);

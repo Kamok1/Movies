@@ -37,6 +37,7 @@ builder.Services.AddScoped<IActorService, ActorService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -61,7 +62,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        ValidateIssuerSigningKey = true
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero
     };
 });
 builder.Services.AddAuthorization();

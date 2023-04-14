@@ -2,7 +2,6 @@
 
 public record JwtResponse
 {
-  public string Jwt { get; init; }
-  public int ExpiresIn { get; init; }
-
+  public string Token { get; set; }
+  public UserRefreshToken RefreshToken { get; set; }
 }

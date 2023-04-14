@@ -2,6 +2,7 @@
 using Extensions;
 using Implementations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Models.Auth;
 using Models.Settings;
 using Models.User;
@@ -13,12 +14,12 @@ namespace Movies.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
-    private readonly JwtSettings _jwtSettings;
+    private readonly IAuthService _authService;
 
-    public AuthController(IUserService userService, JwtSettings jwtSettings)
+    public AuthController(IUserService userService, IAuthService authService)
     {
         _userService = userService;
-        _jwtSettings = jwtSettings;
+        _authService = authService;
     }
 
     [HttpPost]
@@ -37,10 +38,21 @@ public class AuthController : ControllerBase
         if (PasswordServices.VerifyPassword(reqLogin.Password, user.Password, user.PasswordSalt) == false)
             return Unauthorized();
         
-        return Ok(new JwtResponse()
-                  {
-                    Jwt = JwtService.GetToken(user, _jwtSettings),
-                    ExpiresIn = _jwtSettings.Expire
-                  });
+        return Ok(await _authService.GetJwtAsync(user));
     }
+
+    [HttpPost]
+    [Route("refreshToken")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest refreshToken)
+    {
+      
+      var user = await _userService.GetUserAsync(refreshToken: refreshToken.Token);
+      if (_authService.ValidateRefreshToken(user, refreshToken.Token) == false)
+      {
+        await _authService.InvalidTokenHandlerAsync(user);
+        return Unauthorized();
+      }
+
+    return Ok(await _authService.GetJwtAsync(user));
+    } 
 }

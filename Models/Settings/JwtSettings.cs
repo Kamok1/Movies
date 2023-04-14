@@ -6,5 +6,6 @@ public record JwtSettings()
     public string Audience { get; init; }
     public string Key { get; init; }
     public int Expire { get; init; }
+    public int RefreshTokenExpire { get; init; }
 
 }

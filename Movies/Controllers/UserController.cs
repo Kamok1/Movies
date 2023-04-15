@@ -31,6 +31,7 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
         await _userService.ChangePasswordAsync(user, passwords);
+        _userService.RemoveUserRefreshToken(user);
         return Ok();
     }
 
@@ -40,6 +41,7 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
         await _userService.ChangeEmailAsync(user, editEmail);
+        _userService.RemoveUserRefreshToken(user);
         return Ok();
         //todo dorbić dobry serwis jakiś z potwierdzeniami
     }

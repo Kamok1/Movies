@@ -71,6 +71,12 @@ public class UserService : IUserService
         if (await _db.SaveChangesAsync() == 0)
             throw new EditingException<User>();
     }
+
+    public void RemoveUserRefreshToken(User user)
+    {
+    user.RefreshToken.Token = string.Empty;
+    user.RefreshToken.Expires = DateTime.MinValue;
+  }
     public async Task<List<DtoMovie>> GetUserMoviesAsync(int id)
     {
       var movies = _db.Movie.Include(movie => movie.UsersFavorite)

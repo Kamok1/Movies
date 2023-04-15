@@ -13,6 +13,7 @@ public interface IUserService
     Task DeleteFromUserMovies(User user, int movieId);
     Task<List<DtoMovie>> GetUserMoviesAsync(int id);
     bool IsMovieInFavorites(User user, int movieId);
+    void RemoveUserRefreshToken(User user);
     Task CreateAsync(UserRegisterRequest reqUser);
     Task ChangeEmailAsync(User reqUser, EmailChange email);
     Task ChangePasswordAsync(User reqUser, PasswordChange passwords);

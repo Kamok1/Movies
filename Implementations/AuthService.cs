@@ -27,7 +27,7 @@ public class AuthService : IAuthService
     jwtResponse.RefreshToken = refreshToken;
     jwtResponse.Token = token;
 
-    await SetRefreshTokenPropertiesAsync(user.Id, refreshToken.Token, refreshToken.Expires);
+    await SetRefreshTokenPropertiesAsync(user, refreshToken.Token, refreshToken.Expires);
 
     return jwtResponse;
   }
@@ -39,16 +39,13 @@ public class AuthService : IAuthService
   
   public async Task InvalidTokenHandlerAsync(User user)
   {
-    await SetRefreshTokenPropertiesAsync(user.Id ,string.Empty, DateTime.MinValue);
+    await SetRefreshTokenPropertiesAsync(user, string.Empty, DateTime.MinValue);
   }
 
-  private async Task SetRefreshTokenPropertiesAsync(int userId, string newToken, DateTime newDate)
+  private async Task SetRefreshTokenPropertiesAsync(User user, string newToken, DateTime newDate)
   {
-    var dbUser = await _db.User.FindAsync(userId);
-    if (dbUser == null)
-      throw new NotFoundException<User>();
-    dbUser.RefreshToken.Token = newToken;
-    dbUser.RefreshToken.Expires = newDate;
+    user.RefreshToken.Token = newToken;
+    user.RefreshToken.Expires = newDate;
     if (await _db.SaveChangesAsync() == 0)
       throw new EditingException<User>();
   }

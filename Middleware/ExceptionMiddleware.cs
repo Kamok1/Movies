@@ -34,13 +34,13 @@ public class ExceptionMiddleware
         {
             statusCode = (int)customEx.StatusCode;
             exceptionDetails.title = customEx.GetType().ShortDisplayName().Split("<")[0]; // ShortDisplayName = 'GenericException<typeof>'
-            exceptionDetails.messege = customEx.Message;
+            exceptionDetails.message = customEx.Message;
         }
         else
         {
             statusCode = (int)HttpStatusCode.InternalServerError;
             exceptionDetails.title = "Internal Server Error";
-            exceptionDetails.messege = "Internal server error occurred!";
+            exceptionDetails.message = "Internal server error occurred!";
         }
 
         exceptionDetails.status = statusCode;
@@ -57,6 +57,6 @@ internal record ExceptionDetails()
 {
     public int status { get; set; }
     public string title { get; set; }
-    public string messege { get; set; }
+    public string message { get; set; }
     public string traceId { get; set; }
 };

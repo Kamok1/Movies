@@ -67,7 +67,15 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetMyMovies()
     {
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
-        return Ok(await _movieService.GetUserMoviesAsync(user.Id));
+        return Ok(await _userService.GetUserMoviesAsync(user.Id));
+    }
+
+    [HttpGet]
+    [Route("me/movies/check/{movieId}")]
+    public async Task<IActionResult> IsInFavorite([FromRoute] int movieId)
+    {
+      var user = await _userService.GetUserAsync(httpContext: HttpContext);
+      return Ok(_userService.IsMovieInFavorites(user, movieId));
     }
 
     [HttpDelete]
@@ -75,7 +83,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> DeleteFromMyMovies([FromRoute] int movieId)
     {
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
-        await _movieService.DeleteFromUserMovies(user, movieId);
+        await _userService.DeleteFromUserMovies(user, movieId);
         return Ok();
     }
 
@@ -84,7 +92,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> AddToMyMovies([FromRoute] int movieId)
     {
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
-        await _movieService.AddUserMovieAsync(user, movieId);
+        await _userService.AddUserMovieAsync(user, movieId);
         return Ok();
     }
 
@@ -101,7 +109,7 @@ public class UserController : ControllerBase
     [Route("{userId}/movies")]
     public async Task<IActionResult> GetUserMovies([FromRoute] int userId)
     {
-        await _movieService.GetUserMoviesAsync(userId);
+        await _userService.GetUserMoviesAsync(userId);
         return Ok();
     }
 

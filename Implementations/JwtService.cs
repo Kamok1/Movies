@@ -27,7 +27,7 @@ public static class JwtService
                     new Claim("id", user.Id.ToString())
                 }
             ),
-            Expires = DateTime.UtcNow.AddMinutes(jwtSettings.Expire),
+            Expires = DateTime.UtcNow.AddSeconds(jwtSettings.Expire),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Key)), SecurityAlgorithms.HmacSha256Signature)
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);

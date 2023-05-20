@@ -18,7 +18,7 @@ public record DtoMovie()
         Rating = movie.Reviews.Any() ? movie.Reviews.Average(x => x.Rate) : 0;
         Description = movie.Description;
         Director = movie.Director?.Name;
-        PosterPath = movie.Posters.FirstOrDefault(poster => poster.IsMain)?.Path ?? "posters/empty.jpg";
+        PosterPath = movie.Posters.FirstOrDefault(poster => poster.IsMain)?.Path ?? "movies/posters/empty.jpg";
         Genres = movie.Genres.Select(x => x.Name).ToList();
         ReleaseDate = movie.ReleaseDate;
     }

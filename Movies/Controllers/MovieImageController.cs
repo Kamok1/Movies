@@ -2,17 +2,20 @@
 using Microsoft.AspNetCore.Mvc;
 
 namespace Movies.Controllers;
-
-public class ImageController : ControllerBase
+[ApiController]
+[Route("api/[controller]")]
+public class MovieImageController : ControllerBase
 {
     private readonly IMovieService _movieService;
     private readonly IImageService _imageService;
 
-    public ImageController(IMovieService movieService, IImageService imageService)
+    public MovieImageController(IMovieService movieService, IImageService imageService)
     {
+
         _movieService = movieService;
         _imageService = imageService;
     }
+
 
     [HttpPost]
     [Route("{movieId}/poster")]

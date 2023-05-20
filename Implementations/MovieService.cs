@@ -4,16 +4,18 @@ using Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Models.Exceptions;
 using Models.Movie;
+using Models.Settings;
 
 namespace Implementations
 {
     public class MovieService : IMovieService
     {
         private readonly AppDbContext _db;
-
-        public MovieService(AppDbContext db)
+        private readonly FileSettings _fileSettings;
+        public MovieService(AppDbContext db, AppSettings settings)
         {
             _db = db;
+            _fileSettings = settings.File;
         }
 
         public async Task<List<DtoMovie>> GetMoviesDtoAsync(int year, string? title, int genreId, int directorId, int actorId, int page,
@@ -55,12 +57,19 @@ namespace Implementations
                 Title = reqModel.Title,
                 Description = reqModel.Description,
                 ReleaseDate = reqModel.ReleaseDate,
+                Posters = new List<Poster>()
             };
+            newMovie.Posters.Add(new Poster()
+            {
+              IsMain = true,
+              Path = _fileSettings.PlaceholderPicturePath
+            });
 
             await _db.Movie.AddAsync(newMovie);
             if (await _db.SaveChangesAsync() == 0)
                 throw new AddingException<Movie>();
-        }
+
+    }
         public async Task EditAsync(RequestMovie reqModel, int id)
         {
             var movie = await GetMovieAsync(id);

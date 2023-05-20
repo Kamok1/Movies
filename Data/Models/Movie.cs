@@ -14,7 +14,7 @@ public class Movie
     [MaxLength(100000)]
     public string Description { get; set; }
     [MaxLength(10000)]
-    public string TrailerUrl { get; set; }
+    public string? TrailerUrl { get; set; }
 
   [Column(TypeName = "timestamp with time zone")]
     public DateTime ReleaseDate { get; set; }

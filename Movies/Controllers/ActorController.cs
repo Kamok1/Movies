@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Actor;
+using Models.Settings;
 
 namespace Movies.Controllers;
 
 [ApiController]
-[Authorize(Roles = "Admin")]
+//[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 
 public class ActorController : ControllerBase
@@ -31,16 +32,21 @@ public class ActorController : ControllerBase
         return Ok(await _actorService.GetActorsDtoAsync(movieId));
     }
 
-    [HttpDelete]
-    [Route("{id}")]
+    [HttpPut("photo/{id}")]
+    public async Task<IActionResult> EditPhoto([FromRoute] int id, IFormFile picture)
+    {
+      await _actorService.EditActorPicture(picture, id);
+      return Ok();
+    }
+
+    [HttpDelete("{id}")]
     public async Task<IActionResult> Delete([FromRoute] int id)
     {
         await _actorService.DeleteAsync(id);
         return Ok();
     }
 
-    [HttpPut]
-    [Route("{id}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> Edit([FromBody] RequestActor editActor, [FromRoute] int id)
     {
         await _actorService.EditAsync(editActor, id);
@@ -48,6 +54,7 @@ public class ActorController : ControllerBase
     }
 
     [HttpPut("movie")]
+    //todo put into movie controller
     public async Task<IActionResult> EditMovieActors([FromBody] EditMovieActors editMovieActors)
     {
         var movie = await _movieService.GetMovieAsync(editMovieActors.MovieId);
@@ -56,7 +63,7 @@ public class ActorController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] RequestActor reqActor)
+    public async Task<IActionResult> Add(RequestActor reqActor)
     {
         await _actorService.AddAsync(reqActor);
         return Ok();

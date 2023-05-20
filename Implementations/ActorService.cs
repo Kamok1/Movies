@@ -1,18 +1,24 @@
 ﻿using Abstractions;
 using Data;
 using Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Models.Actor;
 using Models.Exceptions;
+using Models.Settings;
 
 namespace Implementations
 {
     public class ActorService : IActorService
     {
         private readonly AppDbContext _db;
-        public ActorService(AppDbContext db)
+        private readonly IFileService _fileService;
+        private readonly FileSettings _fileSettings;
+        public ActorService(AppDbContext db, IFileService fileService, AppSettings settings)
         {
             _db = db;
+            _fileService = fileService;
+            _fileSettings = settings.File;
         }
 
         public async Task EditAsync(RequestActor reqActor, int actorId)
@@ -26,6 +32,15 @@ namespace Implementations
                 throw new EditingException<Actor>();
         }
 
+        public async Task EditActorPicture(IFormFile picture, int actorId)
+        {
+          var actor = await GetActorAsync(actorId);
+          await _fileService.SaveFile(picture, $"{actor.Id}.jpg", Path.Combine(_fileSettings.ResourcesPath, _fileSettings.ActorPicturesPath));
+          actor.PhotoPath = Path.Combine(_fileSettings.ActorPicturesPath, $"{actor.Id}.jpg");
+
+          if (await _db.SaveChangesAsync() == 0)
+            throw new EditingException<Actor>();
+    }
         public async Task EditMovieActorsAsync(Movie movie, EditMovieActors editMovieActors)
         {
             await _db.Entry(movie).Collection(m => m.Actors).LoadAsync();
@@ -44,6 +59,7 @@ namespace Implementations
                 DateOfBirth = reqActor.DateOfBirth,
                 Name = reqActor.Name,
                 Description = reqActor.Description,
+                PhotoPath = _fileSettings.PlaceholderPicturePath
             };
             await _db.Actor.AddAsync(actor);
             if (await _db.SaveChangesAsync() == 0)

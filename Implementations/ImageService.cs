@@ -12,12 +12,12 @@ namespace Implementations;
 public class ImageService : IImageService
 {
     private readonly AppDbContext _db;
-    private readonly AppSettings _settings;
+    private readonly FileSettings _fileSettings;
     private readonly IFileService _fileService;
     public ImageService(AppDbContext db, AppSettings settings, IFileService fileService)
     {
         _db = db;
-        _settings = settings;
+        _fileSettings = settings.File;
         _fileService = fileService;
     }
 
@@ -41,7 +41,7 @@ public class ImageService : IImageService
         await _db.Entry(movie).Collection(m => m.Posters).LoadAsync();
 
         var folderName = $"{movie.Title.OnlyAllowedCharacters()}_{movie.Id}_posters";
-        var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PostersPath, folderName);
+        var folderPath = Path.Combine(_fileSettings.ResourcesPath, _fileSettings.MoviePostersPath, folderName);
         var fileName = $"{movie.Posters.Count + 1}.jpg";
 
         var saveFileTask = _fileService.SaveFile(file, fileName, folderPath);
@@ -53,7 +53,7 @@ public class ImageService : IImageService
         {
             Movie = movie,
             IsMain = isMain,
-            Path = Path.Combine(_settings.PostersPath, folderName, fileName),
+            Path = Path.Combine(_fileSettings.MoviePostersPath, folderName, fileName),
         });
 
         await saveFileTask;
@@ -66,22 +66,22 @@ public class ImageService : IImageService
         var folderName = $"{movie.Title}_{movie.Id}";
         if (Directory.Exists(folderName) == false)
           return;
-        Directory.Delete(Path.Combine(_settings.ResourcesPath, _settings.PostersPath, $"{folderName}_posters"), true);
-        Directory.Delete(Path.Combine(_settings.ResourcesPath, _settings.PicturesPath, $"{folderName}_pictures"), true);
+        Directory.Delete(Path.Combine(_fileSettings.ResourcesPath, _fileSettings.MoviePostersPath, $"{folderName}_posters"), true);
+        Directory.Delete(Path.Combine(_fileSettings.ResourcesPath, _fileSettings.MoviePicturesPath, $"{folderName}_pictures"), true);
     }
     public async Task AddPictureAsync(Movie movie, IFormFile file)
     {
         await _db.Entry(movie).Collection(m => m.Pictures).LoadAsync();
 
         var folderName = $"{movie.Title.OnlyAllowedCharacters()}_{movie.Id}_pictures";
-        var folderPath = Path.Combine(_settings.ResourcesPath, _settings.PicturesPath, folderName);
+        var folderPath = Path.Combine(_fileSettings.ResourcesPath, _fileSettings.MoviePicturesPath, folderName);
         var fileName = $"{movie.Pictures.Count + 1}.jpg";
         var saveFileTask = _fileService.SaveFile(file, fileName, folderPath);
 
         movie.Pictures.Add(new Picture
         {
             Movie = movie,
-            Path = Path.Combine(_settings.PicturesPath, folderName, fileName),
+            Path = Path.Combine(_fileSettings.MoviePicturesPath, folderName, fileName),
         });
         await saveFileTask;
         if (await _db.SaveChangesAsync() == 0)

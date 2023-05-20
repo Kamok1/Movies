@@ -4,6 +4,10 @@ This is the backend service for a movie library that allows users to search for 
 
 Frontend to this app is still under development (Angular) https://github.com/Kamok1/MoviesAngular
 
+# TODO
+- [ ] add actor's photos
+- [ ] add refresh-token per device
+- [ ] add link to movie trailer
 # Features
 
 ### Authorization System

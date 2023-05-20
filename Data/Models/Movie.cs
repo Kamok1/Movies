@@ -13,8 +13,10 @@ public class Movie
     public string Title { get; set; }
     [MaxLength(100000)]
     public string Description { get; set; }
+    [MaxLength(10000)]
+    public string TrailerUrl { get; set; }
 
-    [Column(TypeName = "timestamp with time zone")]
+  [Column(TypeName = "timestamp with time zone")]
     public DateTime ReleaseDate { get; set; }
     public virtual ICollection<Poster> Posters { get; set; } = new List<Poster>();
     public virtual ICollection<Picture> Pictures { get; set; } = new List<Picture>();

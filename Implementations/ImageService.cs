@@ -64,7 +64,8 @@ public class ImageService : IImageService
     public void DeleteAllImages(Movie movie)
     {
         var folderName = $"{movie.Title}_{movie.Id}";
-
+        if (Directory.Exists(folderName) == false)
+          return;
         Directory.Delete(Path.Combine(_settings.ResourcesPath, _settings.PostersPath, $"{folderName}_posters"), true);
         Directory.Delete(Path.Combine(_settings.ResourcesPath, _settings.PicturesPath, $"{folderName}_pictures"), true);
     }

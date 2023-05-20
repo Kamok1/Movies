@@ -9,4 +9,6 @@ public record Actor()
     [MaxLength(10000)] public string Description { get; set; }
     public DateTime DateOfBirth { get; set; }
     public virtual ICollection<Movie> Movies { get; set; }
+    [MaxLength(500)]
+    public string PhotoPath { get; set; }
 }

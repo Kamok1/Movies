@@ -6,8 +6,9 @@ namespace Abstractions;
 
 public interface IAuthService
 {
-  Task<JwtResponse> GetJwtAsync(User user);
-  Task InvalidTokenHandlerAsync(User user);
+  Task<JwtResponse> GetJwtAsync(User user, string ip);
+  void InvalidTokenHandler(User user);
+  void ResetAllRefreshTokens(User user);
   bool ValidateRefreshToken(User user, string refreshToken);
 
 }

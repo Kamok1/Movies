@@ -1,4 +1,5 @@
-﻿using Abstractions;
+﻿using System.Runtime.CompilerServices;
+using Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.User;
@@ -11,10 +12,12 @@ public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly IMovieService _movieService;
-    public UserController(IUserService userService, IMovieService movieService)
+    private readonly IAuthService _authService;
+    public UserController(IUserService userService, IMovieService movieService, IAuthService authService)
     {
         _userService = userService;
         _movieService = movieService;
+        _authService = authService;
     }
 
     [HttpGet]
@@ -31,7 +34,7 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
         await _userService.ChangePasswordAsync(user, passwords);
-        _userService.RemoveUserRefreshToken(user);
+        _authService.ResetAllRefreshTokens(user);
         return Ok();
     }
 
@@ -41,7 +44,7 @@ public class UserController : ControllerBase
     {
         var user = await _userService.GetUserAsync(httpContext: HttpContext);
         await _userService.ChangeEmailAsync(user, editEmail);
-        _userService.RemoveUserRefreshToken(user);
+        _authService.ResetAllRefreshTokens(user);
         return Ok();
         //todo dorbić dobry serwis jakiś z potwierdzeniami
     }

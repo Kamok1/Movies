@@ -38,21 +38,23 @@ public class AuthController : ControllerBase
         if (PasswordServices.VerifyPassword(reqLogin.Password, user.Password, user.PasswordSalt) == false)
             return Unauthorized();
         
-        return Ok(await _authService.GetJwtAsync(user));
+        return Ok(await _authService.GetJwtAsync(user, HttpContext.Request.HttpContext.Connection.RemoteIpAddress!.ToString()));
     }
 
     [HttpPost]
     [Route("refreshToken")]
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest refreshToken)
     {
-      
-      var user = await _userService.GetUserAsync(refreshToken: refreshToken.Token);
-      if (_authService.ValidateRefreshToken(user, refreshToken.Token) == false)
+      var ip = HttpContext.Request.HttpContext.Connection.RemoteIpAddress!.ToString();
+
+
+      var user = await _userService.GetUserAsync(refreshToken: new UserRequestRefreshToken{ Ip = ip, Token = refreshToken.Token});
+      if (_authService.ValidateRefreshToken(user, ip) == false)
       {
-        await _authService.InvalidTokenHandlerAsync(user);
+        _authService.InvalidTokenHandler(user);
         return Unauthorized();
       }
 
-    return Ok(await _authService.GetJwtAsync(user));
+      return Ok(await _authService.GetJwtAsync(user, ip));
     } 
 }

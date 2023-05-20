@@ -1,4 +1,6 @@
-﻿using Abstractions;
+﻿using System.Net.Sockets;
+using System.Security.Authentication;
+using Abstractions;
 using Data.Models;
 using Models.Auth;
 using Models.Settings;
@@ -19,38 +21,60 @@ public class AuthService : IAuthService
     _db = db;
   }
 
-  public async Task<JwtResponse> GetJwtAsync(User user)
+  public async Task<JwtResponse> GetJwtAsync(User user, string ip)
   {
     var token = JwtService.GetToken(user, _jwtSettings);
-    var refreshToken = GetRefreshToken(user);
+    var refreshToken = CreateRefreshToken(user);
     var jwtResponse = new JwtResponse();
     jwtResponse.RefreshToken = refreshToken;
     jwtResponse.Token = token;
 
-    await SetRefreshTokenPropertiesAsync(user, refreshToken.Token, refreshToken.Expires);
+    await SetRefreshTokenPropertiesAsync(user, refreshToken.Token,ip, refreshToken.Expires);
 
     return jwtResponse;
   }
 
-  public bool ValidateRefreshToken(User user, string refreshToken)
+  public bool ValidateRefreshToken(User user, string ip)
   {
-    return user.RefreshToken.Expires > DateTime.UtcNow;
+    var refreshToken = user.RefreshTokens.FirstOrDefault(token => token.Ip == ip);
+    if (refreshToken == null)
+      throw new AuthorizationException();
+    return refreshToken.Expires > DateTime.UtcNow;
   }
   
-  public async Task InvalidTokenHandlerAsync(User user)
+  public void InvalidTokenHandler(User user)
   {
-    await SetRefreshTokenPropertiesAsync(user, string.Empty, DateTime.MinValue);
+    ResetAllRefreshTokens(user);
   }
 
-  private async Task SetRefreshTokenPropertiesAsync(User user, string newToken, DateTime newDate)
+  public void ResetAllRefreshTokens(User user)
   {
-    user.RefreshToken.Token = newToken;
-    user.RefreshToken.Expires = newDate;
+    user.RefreshTokens.ForEach(token =>
+    {
+      token.Expires = DateTime.MinValue;
+      token.Token = string.Empty;
+    });
+  }
+
+  private async Task SetRefreshTokenPropertiesAsync(User user, string newToken, string ip, DateTime newDate)
+  {
+    var refreshToken = user.RefreshTokens.FirstOrDefault(token => token.Ip == ip);
+    if (refreshToken == null)
+    {
+      user.RefreshTokens.Add(new RefreshToken { Expires = newDate, Token = newToken, Ip = ip});
+    }
+    else
+    {
+      refreshToken.Token = newToken;
+      refreshToken.Expires = newDate;
+      refreshToken.Ip = ip;
+    }
+
     if (await _db.SaveChangesAsync() == 0)
       throw new EditingException<User>();
   }
-
-  private UserRefreshToken GetRefreshToken(User user)
+  
+  private UserRefreshToken CreateRefreshToken(User user)
   {
     return new UserRefreshToken()
     {

@@ -20,7 +20,7 @@ namespace Data
           modelBuilder.Entity<Movie>().Navigation(movie => movie.Genres).AutoInclude();
           modelBuilder.Entity<Movie>().Navigation(movie => movie.Director).AutoInclude();
           modelBuilder.Entity<User>().Navigation(user => user.Role).AutoInclude();
-          modelBuilder.Entity<User>().Navigation(user => user.RefreshToken).AutoInclude();
+          modelBuilder.Entity<User>().Navigation(user => user.RefreshTokens).AutoInclude();
         }
 
   }

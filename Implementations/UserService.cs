@@ -30,7 +30,7 @@ public class UserService : IUserService
             throw new AddingException<User>("That username is already in use");
         if (_db.User.Any(x => x.Email == reqUser.Email))
           throw new AddingException<User>("That e-mail is already in use");
-    var passwordSalt = GenerateSalt(64);
+        var passwordSalt = GenerateSalt(64);
         var password = GenerateSaltedHash(passwordSalt, reqUser.Password);
         var role = await _db.Role.Where(x => x.Name == "User").FirstOrDefaultAsync();
 
@@ -72,11 +72,6 @@ public class UserService : IUserService
             throw new EditingException<User>();
     }
 
-    public void RemoveUserRefreshToken(User user)
-    {
-    user.RefreshToken.Token = string.Empty;
-    user.RefreshToken.Expires = DateTime.MinValue;
-  }
     public async Task<List<DtoMovie>> GetUserMoviesAsync(int id)
     {
       var movies = _db.Movie.Include(movie => movie.UsersFavorite)
@@ -121,7 +116,7 @@ public class UserService : IUserService
     {
         throw new EditingException<User>();
     }
-    public async Task<User> GetUserAsync(int? id = default, HttpContext? httpContext = default, string? login = null, string? refreshToken = null)
+    public async Task<User> GetUserAsync(int? id = default, HttpContext? httpContext = default, string? login = null, UserRequestRefreshToken? refreshToken = null)
     {
         var query = _db.User.AsQueryable();
         if (id.IsPositive())
@@ -130,8 +125,8 @@ public class UserService : IUserService
             query = query.Where(user => user.Id == userId);
         else if (!string.IsNullOrEmpty(login))
           query = query.Where(user => user.Login == login || user.Email == login);
-        else if (!string.IsNullOrEmpty(refreshToken))
-          query = query.Where(user => user.RefreshToken.Token == refreshToken);
+        else if (refreshToken != default)
+          query = query.Where(user => user.RefreshTokens.FirstOrDefault(token => token.Ip == refreshToken.Ip).Token == refreshToken.Token);
         else
           throw new NotFoundException<User>();
 

@@ -6,7 +6,7 @@ using Models.Director;
 namespace Movies.Controllers;
 
 [ApiController]
-[Authorize(Roles = "Admin")]
+//[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class DirectorController : ControllerBase
 {
@@ -28,7 +28,14 @@ public class DirectorController : ControllerBase
         return Ok(await _directorService.GetDirectorsDtoAsync());
     }
 
-    [HttpDelete]
+    [HttpPut("photo/{id}")]
+    public async Task<IActionResult> EditPhoto([FromRoute] int id, IFormFile picture)
+    {
+      await _directorService.EditActorPicture(picture, id);
+      return Ok();
+    }
+
+  [HttpDelete]
     [Route("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

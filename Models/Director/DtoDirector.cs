@@ -5,6 +5,7 @@ public record DtoDirector
     public string Name { get; init; }
     public string Description { get; init; }
     public int Id { get; init; }
+    public string PhotoPath { get; init; }
     public DateTime DateOfBirth { get; init; }
 
     public DtoDirector(Data.Models.Director director)
@@ -13,5 +14,6 @@ public record DtoDirector
         Id = director.Id;
         Name = director.Name;
         DateOfBirth = director.DateOfBirth;
+        PhotoPath = director.PhotoPath;
     }
 }

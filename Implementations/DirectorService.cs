@@ -1,19 +1,25 @@
 ﻿using Abstractions;
 using Data;
 using Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Models.Director;
 using Models.Exceptions;
+using Models.Settings;
 
 namespace Implementations;
 
 public class DirectorService : IDirectorService
 {
     private readonly AppDbContext _db;
+    private readonly IFileService _fileService;
+    private readonly FileSettings _fileSettings;
 
-    public DirectorService(AppDbContext db)
+    public DirectorService(AppDbContext db, IFileService fileService, AppSettings settings)
     {
         _db = db;
+        _fileService = fileService;
+        _fileSettings = settings.File;
     }
     public async Task EditAsync(RequestDirector editDirector, int directorId)
     {
@@ -41,6 +47,7 @@ public class DirectorService : IDirectorService
             Name = addDirector.Name,
             Description = addDirector.Description,
             DateOfBirth = addDirector.DateOfBirth,
+            PhotoPath = _fileSettings.PlaceholderPicturePath
         };
         await _db.Director.AddAsync(director);
         if (await _db.SaveChangesAsync() == 0)
@@ -53,6 +60,16 @@ public class DirectorService : IDirectorService
         if (await _db.SaveChangesAsync() == 0)
             throw new DeletingException<Director>();
     }
+
+    public async Task EditActorPicture(IFormFile picture, int id)
+    {
+    var director = await GetDirectorAsync(id);
+    await _fileService.SaveFile(picture, $"{director.Id}.jpg", Path.Combine(_fileSettings.ResourcesPath, _fileSettings.DirectorPicturesPath));
+    director.PhotoPath = Path.Combine(_fileSettings.ActorPicturesPath, $"{director.Id}.jpg");
+
+    if (await _db.SaveChangesAsync() == 0)
+      throw new EditingException<Actor>();
+  }
 
     public async Task<List<DtoDirector>> GetDirectorsDtoAsync()
     {

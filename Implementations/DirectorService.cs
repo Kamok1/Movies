@@ -61,11 +61,11 @@ public class DirectorService : IDirectorService
             throw new DeletingException<Director>();
     }
 
-    public async Task EditActorPicture(IFormFile picture, int id)
+    public async Task EditDirectorPhoto(IFormFile picture, int id)
     {
     var director = await GetDirectorAsync(id);
     await _fileService.SaveFile(picture, $"{director.Id}.jpg", Path.Combine(_fileSettings.ResourcesPath, _fileSettings.DirectorPicturesPath));
-    director.PhotoPath = Path.Combine(_fileSettings.ActorPicturesPath, $"{director.Id}.jpg");
+    director.PhotoPath = Path.Combine(_fileSettings.DirectorPicturesPath, $"{director.Id}.jpg");
 
     if (await _db.SaveChangesAsync() == 0)
       throw new EditingException<Actor>();

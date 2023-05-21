@@ -10,7 +10,7 @@ public interface IDirectorService
     Task EditMovieDirectorAsync(Movie movie, int directorId);
     Task AddAsync(RequestDirector addDirector);
     Task DeleteAsync(int id);
-    Task EditActorPicture(IFormFile picture,  int id);
+    Task EditDirectorPhoto(IFormFile picture,  int id);
     Task<List<DtoDirector>> GetDirectorsDtoAsync();
     Task<DtoDirector> GetDirectorDtoAsync(int id);
 }

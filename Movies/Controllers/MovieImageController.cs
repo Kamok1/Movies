@@ -34,10 +34,10 @@ public class MovieImageController : ControllerBase
 
     [HttpPost]
     [Route("{movieId}/image")]
-    public async Task<IActionResult> AddImage([FromRoute] int movieId, IFormFile poster)
+    public async Task<IActionResult> AddImage([FromRoute] int movieId, IFormFile image)
     {
         var movie = await _movieService.GetMovieAsync(movieId);
-        await _imageService.AddPictureAsync(movie, poster);
+        await _imageService.AddPictureAsync(movie, image);
         return Ok();
     }
     [HttpDelete]

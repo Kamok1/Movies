@@ -31,7 +31,7 @@ public class DirectorController : ControllerBase
     [HttpPut("photo/{id}")]
     public async Task<IActionResult> EditPhoto([FromRoute] int id, IFormFile picture)
     {
-      await _directorService.EditActorPicture(picture, id);
+      await _directorService.EditDirectorPhoto(picture, id);
       return Ok();
     }
 

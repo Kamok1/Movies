@@ -9,6 +9,7 @@ public record DtoMovie()
     public string? Director { get; init; }
     public DateTime ReleaseDate { get; init; }
     public string PosterPath { get; init; }
+    public string TrailerUrl { get; init; }
     public int Id { get; init; }
 
     public DtoMovie(Data.Models.Movie movie) : this()
@@ -18,7 +19,8 @@ public record DtoMovie()
         Rating = movie.Reviews.Any() ? movie.Reviews.Average(x => x.Rate) : 0;
         Description = movie.Description;
         Director = movie.Director?.Name;
-        PosterPath = movie.Posters.FirstOrDefault(poster => poster.IsMain)?.Path ?? "movies/posters/empty.jpg";
+        PosterPath = movie.Posters.FirstOrDefault(poster => poster.IsMain)?.Path ?? string.Empty;
+        TrailerUrl = movie.TrailerUrl ?? string.Empty;
         Genres = movie.Genres.Select(x => x.Name).ToList();
         ReleaseDate = movie.ReleaseDate;
     }

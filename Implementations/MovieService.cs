@@ -57,6 +57,7 @@ namespace Implementations
                 Title = reqModel.Title,
                 Description = reqModel.Description,
                 ReleaseDate = reqModel.ReleaseDate,
+                TrailerUrl = reqModel.TrailerUrl,
                 Posters = new List<Poster>()
             };
             newMovie.Posters.Add(new Poster()
@@ -77,6 +78,7 @@ namespace Implementations
             movie.Description = reqModel.Description;
             movie.Title = reqModel.Title;
             movie.ReleaseDate = reqModel.ReleaseDate;
+            movie.TrailerUrl = reqModel.TrailerUrl;
 
             if (await _db.SaveChangesAsync() == 0)
                 throw new EditingException<Movie>();

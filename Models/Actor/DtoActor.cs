@@ -5,6 +5,7 @@ public record DtoActor
     public int Id { get; init; }
     public string Name { get; init; }
     public string DateOfBirth { get; init; }
+    public string Description { get; init; }
     public string PhotoPath { get; init; }
 
     public DtoActor(Data.Models.Actor actor)
@@ -12,6 +13,7 @@ public record DtoActor
         Name = actor.Name; 
         DateOfBirth = actor.DateOfBirth.ToShortDateString();
         Id = actor.Id;
+        Description = actor.Description;
         PhotoPath = actor.PhotoPath;
     }
 }
